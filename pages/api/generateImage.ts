@@ -1,68 +1,40 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { Prodia } from "pixio-prodia";
 
-const defaultSettings = {
-  steps: 30,
-  cfg_scale: 20,
-  upscale: false,
-  sampler: 'DDIM',
-  aspect_ratio: 'square'
-};
+const VIDEO_TYPES = ['txt2vid', 'img2vid', 'vid2vid', 'aud2vid'];
+const isVideo = (type: string) => VIDEO_TYPES.some(k => type.includes(k));
 
-async function createImageGenerationJob(prodia, options) {
-  console.log('Creating image generation job with options:', options);
-  let job = await prodia.createJob(options);
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (req.method !== 'POST') return res.status(405).end();
 
-  console.log('Created job:', job);
+  const { type, config, apiKey: bodyKey } = req.body;
+  const apiKey = bodyKey || process.env.PRODIA_KEY;
 
-  while (job.status !== "succeeded" && job.status !== "failed") {
-    await new Promise((resolve) => setTimeout(resolve, 250));
-    job = await prodia.getJob(job.job);
-    console.log('Updated job status:', job.status);
-  }
+  if (!apiKey) return res.status(401).json({ message: 'No Prodia API key. Enter yours in the app.' });
+  if (!type || !config?.prompt) return res.status(400).json({ message: 'Missing type or prompt' });
 
-  console.log('Job status:', job.status);
-  return job;
-}
-
-export default async (req: NextApiRequest, res: NextApiResponse) => {
-  const {
-    prodiaKey,
-    model,
-    prompt,
-    negativePrompt,
-    seed,
-    steps,
-    cfg_scale,
-    upscale,
-    sampler,
-    aspect_ratio
-  } = req.body;
-
-  const prodia = new Prodia(prodiaKey);
-  const options = {
-    model: model || 'deliberate_v2.safetensors [10ec4b29]',
-    prompt: prompt || 'puppy',
-    negative_prompt: negativePrompt || 'unnatural, unrealistic, cartoon, illustration, painting, drawing, unreal engine, black and white, monochrome, oversaturated, low saturation, surreal, underexposed, overexposed, jpeg artifacts, conjoined, aberrations, multiple levels, harsh lighting, anime, sketches, twisted, video game, photoshop, creative, UI, abstract, collapsed, rotten, extra windows, disfigured, disproportionate, bad anatomy, bad proportions, ugly, out of frame, mangled, asymmetric, cross-eyed, depressed, immature, stuffed animal, out of focus, high depth of field, cloned face, cloned head, age spot, skin blemishes, collapsed eyeshadow, asymmetric ears, imperfect eyes, floating hair, unnatural, conjoined, missing limb, missing arm, missing leg, poorly drawn face, poorly drawn feet, poorly drawn hands, floating limb, disconnected limb, extra limb, malformed limbs, malformed hands, poorly rendered face, poor facial details, poorly rendered hands, double face, unbalanced body, unnatural body, lacking body, childish, long body, cripple, old, fat, cartoon, 3D, weird colors, unnatural skin tone, unnatural skin, stiff face, fused hand, skewed eyes, mustache, beard, surreal, cropped head, group of people,pixelated,noisy,distorted,overexposed,underexposed,caricature,unnatural colors,oversaturated,undersaturated,too dark,too light,lack of detail,exaggerated features,unbalanced composition,fuzzy,sketch-like,discolored,flat lighting,cartoon,deformed,ugly,blurry,low quality,low resolution,low res,low resolution,low res',
-    seed: seed || -1,
-    steps: steps || defaultSettings.steps,
-    cfg_scale: cfg_scale || defaultSettings.cfg_scale,
-    upscale: upscale !== undefined ? upscale : defaultSettings.upscale,
-    sampler: sampler || defaultSettings.sampler,
-    aspect_ratio: aspect_ratio || defaultSettings.aspect_ratio
-  };
+  const video = isVideo(type);
+  const acceptMime = video ? 'video/mp4' : 'image/jpeg';
 
   try {
-    let imageGenerationJob = await createImageGenerationJob(prodia, options);
+    const prodiaRes = await fetch('https://inference.prodia.com/v2/job', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+        Accept: acceptMime,
+      },
+      body: JSON.stringify({ type, config }),
+    });
 
-    if (imageGenerationJob.status !== "succeeded") {
-      throw new Error("Image generation job failed");
+    if (!prodiaRes.ok) {
+      const errText = await prodiaRes.text();
+      return res.status(prodiaRes.status).json({ message: `Prodia error ${prodiaRes.status}`, error: errText });
     }
 
-    console.log('Image generation job succeeded:', imageGenerationJob);
-    res.status(200).json({ imageUrl: imageGenerationJob.imageUrl });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Failed to generate image", error: error.message });
+    const buffer = Buffer.from(await prodiaRes.arrayBuffer());
+    const dataUrl = `data:${acceptMime};base64,${buffer.toString('base64')}`;
+    return res.status(200).json({ url: dataUrl, video });
+  } catch (e: any) {
+    return res.status(500).json({ message: e.message });
   }
-};
+}
