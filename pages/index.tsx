@@ -188,10 +188,19 @@ function ApiKeyModal({ onSave, tk }: { onSave: (k: string) => void; tk: ReturnTy
           </div>
         </div>
         <h2 style={{ fontSize:20, fontWeight:800, marginBottom:10, color:tk.text }}>Add your Prodia API key</h2>
-        <p style={{ fontSize:14, color:tk.textSub, lineHeight:1.7, marginBottom:24 }}>
-          Get a free key at{' '}
-          <a href="https://app.prodia.com" target="_blank" rel="noreferrer" style={{ color:'#e879f9', textDecoration:'none', fontWeight:600 }}>app.prodia.com</a>. Stored only in your browser — never sent anywhere else.
+        <p style={{ fontSize:14, color:tk.textSub, lineHeight:1.7, marginBottom:16 }}>
+          Pixio uses your own Prodia API key — stored only in your browser, never shared.
         </p>
+        <a href="https://app.prodia.com" target="_blank" rel="noreferrer"
+          style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'12px 16px', borderRadius:12, background:'rgba(232,121,249,0.06)', border:'1px solid rgba(232,121,249,0.2)', marginBottom:20, textDecoration:'none', transition:'all 0.2s', cursor:'pointer' }}
+          onMouseEnter={(e:any)=>e.currentTarget.style.borderColor='rgba(232,121,249,0.45)'}
+          onMouseLeave={(e:any)=>e.currentTarget.style.borderColor='rgba(232,121,249,0.2)'}>
+          <div>
+            <div style={{ fontSize:13, fontWeight:700, color:'#e879f9' }}>Get a free API key</div>
+            <div style={{ fontSize:11.5, color:tk.textMuted, marginTop:2 }}>app.prodia.com → Sign up → API Keys</div>
+          </div>
+          <span style={{ fontSize:16, color:'rgba(232,121,249,0.6)' }}>↗</span>
+        </a>
         <input type="password" value={val} onChange={e=>setVal(e.target.value)}
           onKeyDown={e=>e.key==='Enter'&&val.trim()&&onSave(val.trim())}
           placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9…"
@@ -312,7 +321,7 @@ export default function Home() {
       {/* Banner */}
       {!bannerOff && (
         <a href="https://beta.pixio.myapps.ai" target="_blank" rel="noreferrer"
-          style={{ position:'fixed', top:0, left:0, right:0, zIndex:150, height:36, display:'flex', alignItems:'center', overflow:'hidden', cursor:'pointer', textDecoration:'none', background:'linear-gradient(90deg,#0d0020,#1a0035,#0d0020)', borderBottom:'1px solid rgba(232,121,249,0.2)' }}>
+          style={{ position:'fixed', top:0, left:0, right:0, zIndex:150, height:36, display:'flex', alignItems:'center', overflow:'hidden', cursor:'pointer', textDecoration:'none', background:'#020008', borderBottom:'1px solid rgba(232,121,249,0.15)' }}>
           <div style={{ position:'absolute', inset:0, background:'linear-gradient(90deg,transparent,rgba(232,121,249,0.06),transparent)', backgroundSize:'200% 100%', animation:'shimmer 3s linear infinite', pointerEvents:'none' }}/>
           <div style={{ display:'flex', whiteSpace:'nowrap', animation:'marquee 20s linear infinite', willChange:'transform' }}>
             {[0,1].map(i=>(
