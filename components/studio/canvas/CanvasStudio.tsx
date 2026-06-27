@@ -3,7 +3,7 @@
 // A freeform, Canva-style infinite design board on a Konva Stage. Add/upload
 // images, text and shapes; generate with txt2img; and — the flagship — click an
 // image to AI-edit it: instruction edits, remove-bg, upscale, variation,
-// describe→prompt, and brush-mask inpainting. Premium plum/pink/violet chrome.
+// describe→prompt, and brush-mask inpainting. Accent-driven pink/violet chrome.
 //
 // CLIENT-ONLY: the parent must dynamic-import this with { ssr: false } because
 // react-konva needs the DOM. All window/document access here is inside effects
@@ -36,7 +36,16 @@ import type { StudioAsset, Theme } from '../../../lib/studio/types';
 import type { GenerationParams } from '../../../lib/prodia/types';
 import { runJob, describeImage, jobErrorMessage } from '../../../lib/prodia/client';
 import { buildConfig } from '../../../lib/prodia/config';
-import { getModel, editModels, INPAINT_MODELS, UTILITY_MODELS } from '../../../lib/prodia/catalog';
+import {
+  CLASSIFY_MODELS,
+  FACE_RESTORE_MODELS,
+  SEGMENT_MODELS,
+  VECTOR_MODELS,
+  getModel,
+  editModels,
+  INPAINT_MODELS,
+  UTILITY_MODELS,
+} from '../../../lib/prodia/catalog';
 
 import type {
   CanvasElement,
@@ -92,6 +101,10 @@ interface Toast {
 
 const UPSCALE_MODEL = UTILITY_MODELS.find((m) => m.operation === 'upscale');
 const REMOVEBG_MODEL = UTILITY_MODELS.find((m) => m.operation === 'removebg');
+const SEGMENT_MODEL = SEGMENT_MODELS[0];
+const CLASSIFY_MODEL = CLASSIFY_MODELS.find((m) => m.id.includes('nsfw')) ?? CLASSIFY_MODELS[0];
+const FACE_RESTORE_MODEL = FACE_RESTORE_MODELS[0];
+const VECTOR_MODEL = VECTOR_MODELS[0];
 const VARIATION_MODEL =
   editModels().find((m) => m.operation === 'img2img' && m.family === 'FLUX') ?? editModels()[0];
 const DEFAULT_INPAINT = INPAINT_MODELS[0]?.id ?? '';
@@ -113,7 +126,7 @@ const CanvasStudio: React.FC<CanvasStudioProps> = ({
   theme,
   seedImages,
   onAsset,
-  accentColor = '#ff4ecb',
+  accentColor = '#ff5fb7',
 }) => {
   // Konva (canvas 2D) cannot resolve CSS vars — compute real colors here.
   const gridStroke = theme === 'light' ? 'rgba(60,60,72,0.10)' : 'rgba(255,255,255,0.07)';
@@ -486,12 +499,16 @@ const CanvasStudio: React.FC<CanvasStudioProps> = ({
           format: params.outputFormat,
           trackCost,
         });
+        if (!res.url) throw new Error('Prodia returned metadata without an image.');
         await placeImage(res.url, { name: 'Generated', prompt, modelType: model.type });
         onAsset?.({
           id: assetId,
           status: 'done',
           url: res.url,
           isVideo: res.video,
+          outputs: res.outputs,
+          metadata: res.metadata,
+          mimeType: res.mimeType,
           prompt,
           modelType: model.type,
           modelLabel: model.label,
@@ -573,6 +590,7 @@ const CanvasStudio: React.FC<CanvasStudioProps> = ({
           format: params.outputFormat,
           trackCost,
         });
+        if (!res.url) throw new Error('Prodia returned metadata without an image.');
         if (opts.mode === 'replace') {
           // refresh natural ratio in case dimensions changed (e.g. upscale)
           let newW = target.width;
@@ -604,6 +622,9 @@ const CanvasStudio: React.FC<CanvasStudioProps> = ({
         }
         reportAsset('done', {
           url: res.url,
+          outputs: res.outputs,
+          metadata: res.metadata,
+          mimeType: res.mimeType,
           prompt: opts.prompt,
           modelType: opts.modelType,
           modelLabel: opts.modelLabel,
@@ -707,6 +728,101 @@ const CanvasStudio: React.FC<CanvasStudioProps> = ({
         return;
       }
 
+      if (kind === 'segment') {
+        if (!SEGMENT_MODEL) return;
+        await runImageJob({
+          target,
+          label: 'Segmenting',
+          modelType: SEGMENT_MODEL.type,
+          config: buildConfig(SEGMENT_MODEL, params, payload.instruction || target.prompt || ''),
+          inputs: [target.src],
+          modelLabel: SEGMENT_MODEL.label,
+          family: SEGMENT_MODEL.family,
+          mode: 'new',
+          prompt: payload.instruction || target.prompt || '',
+          offset: 24,
+        });
+        return;
+      }
+
+      if (kind === 'classify') {
+        if (!CLASSIFY_MODEL) return;
+        await runImageJob({
+          target,
+          label: 'Classifying',
+          modelType: CLASSIFY_MODEL.type,
+          config: buildConfig(CLASSIFY_MODEL, params, ''),
+          inputs: [target.src],
+          modelLabel: CLASSIFY_MODEL.label,
+          family: CLASSIFY_MODEL.family,
+          mode: 'new',
+          prompt: target.prompt || '',
+          offset: 24,
+        });
+        return;
+      }
+
+      if (kind === 'facerestore') {
+        if (!FACE_RESTORE_MODEL) return;
+        await runImageJob({
+          target,
+          label: 'Restoring',
+          modelType: FACE_RESTORE_MODEL.type,
+          config: buildConfig(FACE_RESTORE_MODEL, params, ''),
+          inputs: [target.src],
+          modelLabel: FACE_RESTORE_MODEL.label,
+          family: FACE_RESTORE_MODEL.family,
+          mode: 'replace',
+          prompt: target.prompt || '',
+        });
+        return;
+      }
+
+      if (kind === 'vectorize') {
+        if (!VECTOR_MODEL) return;
+        const p = payload.instruction || target.prompt || params.prompt || 'minimal vector mark in pink and purple';
+        setAiBusy(true);
+        setAiLabel('Vectorizing');
+        patchElement(target.id, { loading: true, loadingLabel: 'Vectorizing…' } as Partial<CanvasElement>);
+        try {
+          const res = await runJob({
+            type: VECTOR_MODEL.type,
+            config: buildConfig(VECTOR_MODEL, params, p),
+            apiKey,
+            format: params.outputFormat,
+            trackCost,
+          });
+          if (!res.url) throw new Error('Prodia returned no SVG output.');
+          patchElement(target.id, { loading: false, loadingLabel: undefined } as Partial<CanvasElement>);
+          await placeImage(
+            res.url,
+            { name: VECTOR_MODEL.label, prompt: p, modelType: VECTOR_MODEL.type },
+            { x: target.x + target.width + target.width / 2 + 40, y: target.y + target.height / 2 },
+          );
+          reportAsset('done', {
+            url: res.url,
+            outputs: res.outputs,
+            metadata: res.metadata,
+            mimeType: res.mimeType,
+            prompt: p,
+            modelType: VECTOR_MODEL.type,
+            modelLabel: VECTOR_MODEL.label,
+            family: VECTOR_MODEL.family,
+            price: res.price?.dollars ?? null,
+          });
+          toast('success', 'Vector complete');
+        } catch (err) {
+          patchElement(target.id, { loading: false, loadingLabel: undefined } as Partial<CanvasElement>);
+          const msg = jobErrorMessage(err);
+          reportAsset('error', { modelType: VECTOR_MODEL.type, modelLabel: VECTOR_MODEL.label, family: VECTOR_MODEL.family, error: msg });
+          toast('error', msg);
+        } finally {
+          setAiBusy(false);
+          setAiLabel('');
+        }
+        return;
+      }
+
       // edit-replace / edit-new
       const model = getModel(payload.modelId) ?? editModels()[0];
       if (!model) return;
@@ -727,7 +843,7 @@ const CanvasStudio: React.FC<CanvasStudioProps> = ({
       });
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [selectedImage, params, runImageJob, toast],
+    [selectedImage, params, runImageJob, toast, apiKey, trackCost, patchElement, placeImage, reportAsset],
   );
 
   /* ── mask mode ─────────────────────────────────────────────────────────── */
@@ -821,6 +937,7 @@ const CanvasStudio: React.FC<CanvasStudioProps> = ({
         format: params.outputFormat,
         trackCost,
       });
+      if (!res.url) throw new Error('Prodia returned metadata without an image.');
       patchElement(target.id, {
         src: res.url,
         loading: false,
@@ -830,6 +947,9 @@ const CanvasStudio: React.FC<CanvasStudioProps> = ({
       } as Partial<CanvasElement>);
       reportAsset('done', {
         url: res.url,
+        outputs: res.outputs,
+        metadata: res.metadata,
+        mimeType: res.mimeType,
         prompt: maskPrompt.trim(),
         modelType: model.type,
         modelLabel: model.label,
@@ -1338,7 +1458,7 @@ const CanvasStudio: React.FC<CanvasStudioProps> = ({
           height: 56px;
           padding: 0 16px;
           flex: 0 0 auto;
-          background: linear-gradient(180deg, ${TOKENS.panel}, rgba(27, 10, 34, 0.6));
+          background: linear-gradient(180deg, ${TOKENS.panel}, color-mix(in srgb, var(--violet) 8%, var(--bg)));
           border-bottom: 1px solid ${TOKENS.line};
           z-index: 20;
         }
@@ -1369,7 +1489,7 @@ const CanvasStudio: React.FC<CanvasStudioProps> = ({
           display: flex;
           align-items: center;
           gap: 5px;
-          background: rgba(0, 0, 0, 0.25);
+          background: var(--ghost);
           border: 1px solid ${TOKENS.line};
           border-radius: 12px;
           padding: 4px 6px;
@@ -1396,7 +1516,7 @@ const CanvasStudio: React.FC<CanvasStudioProps> = ({
           padding: 8px 13px;
           border-radius: ${TOKENS.radiusSm}px;
           border: 1px solid ${TOKENS.line};
-          background: rgba(255, 255, 255, 0.03);
+          background: var(--ghost);
           color: ${TOKENS.text};
           font-family: ${TOKENS.font};
           font-size: 12.5px;
@@ -1406,7 +1526,7 @@ const CanvasStudio: React.FC<CanvasStudioProps> = ({
         }
         .tbtn:hover:not(:disabled) {
           border-color: ${TOKENS.lineStrong};
-          background: rgba(255, 255, 255, 0.07);
+          background: color-mix(in srgb, var(--pink) 14%, transparent);
           transform: translateY(-1px);
         }
         .tbtn.primary {
@@ -1481,7 +1601,7 @@ const CanvasStudio: React.FC<CanvasStudioProps> = ({
           text-align: center;
           padding: 30px 28px;
           border-radius: ${TOKENS.radius}px;
-          background: rgba(27, 10, 34, 0.7);
+          background: ${TOKENS.panel};
           border: 1px solid ${TOKENS.line};
           backdrop-filter: blur(14px);
           box-shadow: ${TOKENS.shadow};
@@ -1512,7 +1632,7 @@ const CanvasStudio: React.FC<CanvasStudioProps> = ({
           padding: 9px 16px;
           border-radius: ${TOKENS.radiusSm}px;
           border: 1px solid ${TOKENS.line};
-          background: rgba(255, 255, 255, 0.04);
+          background: var(--ghost);
           color: ${TOKENS.text};
           font-family: ${TOKENS.font};
           font-weight: 700;
@@ -1551,7 +1671,7 @@ const CanvasStudio: React.FC<CanvasStudioProps> = ({
           font-size: 12.5px;
           font-weight: 600;
           color: ${TOKENS.text};
-          background: rgba(20, 10, 26, 0.7);
+          background: ${TOKENS.panel};
           border: 1px solid ${TOKENS.lineStrong};
           box-shadow: ${TOKENS.shadow};
           backdrop-filter: blur(18px);
@@ -1627,8 +1747,8 @@ const InlineTextEditor: React.FC<{
         letterSpacing: element.letterSpacing,
         textAlign: element.align,
         color: element.fill,
-        background: 'rgba(18,7,22,0.6)',
-        border: `1px solid ${TOKENS.pink}`,
+        background: 'color-mix(in srgb, var(--panel) 90%, transparent)',
+        border: `1px solid ${TOKENS.lineStrong}`,
         borderRadius: 8,
         outline: 'none',
         padding: 0,

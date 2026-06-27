@@ -11,7 +11,7 @@ import type { StudioAsset, Surface, Theme } from './types';
 import { idbGet, idbSet, debounce } from './db';
 
 const DEFAULT_PROMPT =
-  'A translucent handheld AI canvas device on a glossy plum workbench, hot-pink light seams, violet glass reflections, cinematic studio lighting, editorial product photography, 8k';
+  'A translucent handheld AI canvas device on a glossy black workbench, luminous accent light seams, glass reflections, cinematic studio lighting, editorial product photography, 8k';
 
 const GALLERY_KEY = 'gallery';
 const MAX_GALLERY = 80;

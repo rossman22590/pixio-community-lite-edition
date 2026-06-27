@@ -30,13 +30,24 @@ function commitDrag(onChange: NodeProps['onChange']) {
   };
 }
 
+function rgbaFromHex(hex: string | undefined, alpha: number) {
+  const raw = (hex || '#ff5fb7').trim().replace('#', '');
+  const full = raw.length === 3 ? raw.split('').map((c) => c + c).join('') : raw.slice(0, 6);
+  const value = Number.parseInt(full, 16);
+  if (!Number.isFinite(value)) return `rgba(255, 95, 183, ${alpha})`;
+  return `rgba(${(value >> 16) & 255}, ${(value >> 8) & 255}, ${value & 255}, ${alpha})`;
+}
+
 /* ── Image node ──────────────────────────────────────────────────────────── */
 const ImageNode: React.FC<NodeProps & {
   el: ImageElement;
   maskMode: boolean;
   maskStrokes: MaskStroke[];
-}> = ({ el, selected, draggable, onSelect, onChange, registerRef, maskMode, maskStrokes, accentColor = '#ff4ecb' }) => {
+}> = ({ el, selected, draggable, onSelect, onChange, registerRef, maskMode, maskStrokes, accentColor = '#ff5fb7' }) => {
   const [image, status] = useCanvasImage(el.src);
+  const placeholderFill = rgbaFromHex(accentColor, 0.16);
+  const placeholderStroke = rgbaFromHex(accentColor, 0.36);
+  const maskFill = rgbaFromHex(accentColor, 0.22);
 
   return (
     <Group
@@ -61,8 +72,8 @@ const ImageNode: React.FC<NodeProps & {
           width={el.width}
           height={el.height}
           cornerRadius={el.cornerRadius}
-          fill="rgba(22,22,28,0.85)"
-          stroke="rgba(255,255,255,0.14)"
+          fill={placeholderFill}
+          stroke={placeholderStroke}
           strokeWidth={1}
         />
       )}
@@ -82,7 +93,7 @@ const ImageNode: React.FC<NodeProps & {
       {/* mask strokes overlay (only the element being masked) */}
       {maskMode && (
         <Group clipFunc={(ctx) => clipRoundRect(ctx, el.width, el.height, el.cornerRadius)}>
-          <Rect width={el.width} height={el.height} fill="rgba(12,12,16,0.5)" />
+          <Rect width={el.width} height={el.height} fill={maskFill} />
           {maskStrokes.map((s, i) => (
             <Line
               key={i}
@@ -230,14 +241,15 @@ const LoadingVeil: React.FC<{ width: number; height: number; radius: number; lab
   height,
   radius,
   label,
-  accentColor = '#ff4ecb',
+  accentColor = '#ff5fb7',
 }) => {
   const cx = width / 2;
   const cy = height / 2;
   const r = Math.max(10, Math.min(width, height) * 0.12);
+  const veilFill = rgbaFromHex(accentColor, 0.32);
   return (
     <Group listening={false}>
-      <Rect width={width} height={height} cornerRadius={radius} fill="rgba(12,12,16,0.66)" />
+      <Rect width={width} height={height} cornerRadius={radius} fill={veilFill} />
       <SpinnerArc x={cx} y={cy} radius={r} accentColor={accentColor} />
       {label && (
         <KText
@@ -249,7 +261,7 @@ const LoadingVeil: React.FC<{ width: number; height: number; radius: number; lab
           fontSize={Math.max(11, Math.min(width, height) * 0.05)}
           fontFamily="Inter, sans-serif"
           fontStyle="bold"
-          fill="#fff4fb"
+          fill="#fff"
         />
       )}
     </Group>
@@ -259,7 +271,7 @@ const LoadingVeil: React.FC<{ width: number; height: number; radius: number; lab
 /** A rotating arc used as a Konva spinner. Animated by Stage's batchDraw loop
  *  via the `rotation` ticking from the parent — but to be self-contained we use
  *  a Konva animation in an effect. */
-const SpinnerArc: React.FC<{ x: number; y: number; radius: number; accentColor?: string }> = ({ x, y, radius, accentColor = '#ff4ecb' }) => {
+const SpinnerArc: React.FC<{ x: number; y: number; radius: number; accentColor?: string }> = ({ x, y, radius, accentColor = '#ff5fb7' }) => {
   const ref = React.useRef<Konva.Circle>(null);
   React.useEffect(() => {
     const node = ref.current;

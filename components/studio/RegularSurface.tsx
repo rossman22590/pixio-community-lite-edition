@@ -8,6 +8,7 @@ import RemixBar from './RemixBar';
 
 const short = (s: string, n = 80) => (s.length > n ? `${s.slice(0, n - 1)}…` : s);
 const cost = (p?: number | null) => (p || p === 0 ? `$${Number(p).toFixed(4)}` : '—');
+const extFor = (a: StudioAsset) => (a.mimeType?.includes('svg') ? 'svg' : a.isVideo ? 'mp4' : 'png');
 
 function Media({ asset }: { asset: StudioAsset }) {
   if (asset.status === 'running') return <div className="skeleton" />;
@@ -94,7 +95,7 @@ export default function RegularSurface({ onSelect }: { onSelect: (id: string) =>
               ? <video src={done[box].url} autoPlay loop controls />
               : <img src={done[box].url} alt={done[box].prompt} />}
             <div style={{ position: 'absolute', top: 14, right: 14, display: 'flex', gap: 8 }}>
-              <a className="btn icon" href={done[box].url} download={`pixio.${done[box].isVideo ? 'mp4' : 'png'}`} onClick={(e) => e.stopPropagation()}><Download size={15} /></a>
+              <a className="btn icon" href={done[box].url} download={`pixio.${extFor(done[box])}`} onClick={(e) => e.stopPropagation()}><Download size={15} /></a>
               <button className="btn icon" onClick={() => setBox(null)}><X size={16} /></button>
             </div>
             {done.length > 1 && (

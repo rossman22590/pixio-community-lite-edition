@@ -3,7 +3,7 @@ import {
   Check, Copy, Film, ImageIcon, RefreshCcw, Search, Settings2, Sparkles, Wand2,
 } from 'lucide-react';
 import {
-  ASPECT_RATIOS, FAMILY_COLORS, RESOLUTIONS, SDXL_STYLES, TXT2IMG_MODELS, TXT2VID_MODELS, familyColor,
+  ASPECT_RATIOS, FAMILY_COLORS, RESOLUTIONS, SDXL_STYLES, STUDIO_IMAGE_MODELS, STUDIO_VIDEO_MODELS, familyColor,
 } from '../../lib/prodia/catalog';
 import type { ModelFamily, ProdiaModel } from '../../lib/prodia/types';
 import { assistPrompt, type PromptVariant } from '../../lib/prodia/client';
@@ -16,7 +16,7 @@ export default function Sidebar({ onGenerate }: { onGenerate: () => void }) {
   const [variants, setVariants] = useState<PromptVariant[]>([]);
   const [busy, setBusy] = useState(false);
 
-  const models = medium === 'image' ? TXT2IMG_MODELS : TXT2VID_MODELS;
+  const models = medium === 'image' ? STUDIO_IMAGE_MODELS : STUDIO_VIDEO_MODELS;
   const families = useMemo(() => Array.from(new Set(models.map((m) => m.family))), [models]);
 
   const visible = useMemo(() => {

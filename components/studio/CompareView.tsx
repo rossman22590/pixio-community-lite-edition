@@ -398,7 +398,7 @@ export default function CompareView({ open, onClose }: CompareViewProps) {
         zIndex: 130,
         display: 'flex',
         flexDirection: 'column',
-        background: 'rgba(8, 2, 12, 0.82)',
+        background: 'var(--scrim)',
         backdropFilter: 'blur(18px)',
         WebkitBackdropFilter: 'blur(18px)',
         animation: 'fade-up 0.2s var(--ease)',

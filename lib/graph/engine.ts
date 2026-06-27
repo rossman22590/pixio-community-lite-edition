@@ -95,6 +95,8 @@ export function ancestorScope(targetId: string, edges: Edge[]): Set<string> {
 interface NodeInputs {
   /** Image data URLs by input handle id (e.g. image, mask). */
   images: Record<string, string>;
+  videos: Record<string, string>;
+  audios: Record<string, string>;
   /** Prompt/instruction text gathered from a connected text node. */
   text?: string;
   /** Whether every required upstream produced something usable. */
@@ -107,6 +109,8 @@ interface NodeInputs {
 function outputOf(node: GraphNode): string | undefined {
   if (node.data.type === 'prompt') return node.data.text;
   if (node.data.type === 'imageInput') return node.data.source;
+  if (node.data.type === 'videoInput') return node.data.source;
+  if (node.data.type === 'audioInput') return node.data.source;
   return node.data.output;
 }
 
@@ -114,6 +118,8 @@ function gatherInputs(node: GraphNode, nodes: GraphNode[], edges: Edge[]): NodeI
   const spec = getSpec(node.data.type);
   const byId = new Map(nodes.map((n) => [n.id, n]));
   const images: Record<string, string> = {};
+  const videos: Record<string, string> = {};
+  const audios: Record<string, string> = {};
   let text: string | undefined;
 
   const incoming = edges.filter((e) => e.target === node.id);
@@ -130,22 +136,29 @@ function gatherInputs(node: GraphNode, nodes: GraphNode[], edges: Edge[]): NodeI
       text = value;
     } else if (port.dataType === 'image') {
       images[port.id] = value;
+    } else if (port.dataType === 'video') {
+      videos[port.id] = value;
+    } else if (port.dataType === 'audio') {
+      audios[port.id] = value;
     }
   }
 
   // Validate that required inputs are present for the operation.
-  const reason = missingInputReason(node.data.type, images, text);
-  return { images, text, ready: !reason, reason };
+  const reason = missingInputReason(node.data.type, images, videos, audios, text);
+  return { images, videos, audios, text, ready: !reason, reason };
 }
 
 /** Returns a human reason a node can't run, or undefined when satisfied. */
 function missingInputReason(
   type: NodeType,
   images: Record<string, string>,
+  videos: Record<string, string>,
+  audios: Record<string, string>,
   text?: string,
 ): string | undefined {
   switch (type) {
     case 'generate':
+    case 'vectorize':
       return undefined; // prompt is optional (can fall back to params/empty)
     case 'edit':
     case 'animate':
@@ -156,14 +169,34 @@ function missingInputReason(
       return undefined;
     case 'upscale':
     case 'removebg':
+    case 'segment':
+    case 'classify':
+    case 'facerestore':
       return images.image ? undefined : 'No input image connected';
+    case 'vid2vid':
+      return videos.video ? undefined : 'No input video connected';
+    case 'aud2vid':
+      return audios.audio ? undefined : 'No input audio connected';
     default:
       return undefined;
   }
 }
 
 // ── executable check ────────────────────────────────────────────────────────
-const EXECUTABLE: NodeType[] = ['generate', 'edit', 'inpaint', 'upscale', 'removebg', 'animate'];
+const EXECUTABLE: NodeType[] = [
+  'generate',
+  'vectorize',
+  'edit',
+  'inpaint',
+  'upscale',
+  'removebg',
+  'segment',
+  'classify',
+  'facerestore',
+  'animate',
+  'vid2vid',
+  'aud2vid',
+];
 const isExecutable = (type: NodeType) => EXECUTABLE.indexOf(type) !== -1;
 
 /** Build a cache signature from the inputs + model so unchanged nodes skip. */
@@ -172,6 +205,8 @@ function signature(node: GraphNode, inputs: NodeInputs): string {
     m: node.data.modelId,
     t: inputs.text ?? '',
     i: inputs.images,
+    v: inputs.videos,
+    a: inputs.audios,
   });
 }
 
@@ -240,8 +275,11 @@ async function executeOrder(
       store.setNodeStatus(id, 'running', { error: undefined });
       const out = await runNode(model, node, inputs, opts);
       store.setNodeStatus(id, 'done', {
-        output: out.url,
+        output: out.url ?? undefined,
         outputIsVideo: out.video,
+        outputs: out.outputs,
+        metadata: out.metadata,
+        mimeType: out.mimeType,
         price: out.price?.dollars ?? null,
         error: undefined,
         rev: (node.data.rev ?? 0) + 1,
@@ -274,6 +312,8 @@ async function runNode(
   const ordered: string[] = [];
   if (inputs.images.image) ordered.push(inputs.images.image);
   if (inputs.images.mask) ordered.push(inputs.images.mask);
+  if (inputs.videos.video) ordered.push(inputs.videos.video);
+  if (inputs.audios.audio) ordered.push(inputs.audios.audio);
 
   return runJob({
     type: model.type,

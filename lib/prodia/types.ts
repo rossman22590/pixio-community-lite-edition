@@ -4,6 +4,8 @@
 // ──────────────────────────────────────────────────────────────────────────
 
 export type MediaMode = 'image' | 'video';
+export type InputKind = 'image' | 'video' | 'audio';
+export type OutputKind = 'image' | 'video' | 'vector' | 'masks' | 'labels';
 
 /**
  * Capability category for a model. Drives which params/handles the UI exposes.
@@ -16,8 +18,14 @@ export type Operation =
   | 'inpaint' // image + mask (+text) -> image
   | 'upscale' // image -> larger image
   | 'removebg' // image -> cutout (+ mask)
+  | 'segment' // image/video -> segmentation masks
+  | 'classify' // image -> labels (+ passthrough image)
+  | 'facerestore' // image -> restored face image
+  | 'vectorize' // text -> SVG vector
   | 'txt2vid' // text -> video
-  | 'img2vid'; // image (+text) -> video
+  | 'img2vid' // image (+text) -> video
+  | 'vid2vid' // video (+text) -> video
+  | 'aud2vid'; // audio (+text) -> video
 
 export type ModelFamily =
   | 'FLUX'
@@ -32,7 +40,12 @@ export type ModelFamily =
   | 'Wan'
   | 'Kling'
   | 'Sora 2'
-  | 'Pruna';
+  | 'Pruna'
+  | 'Runway'
+  | 'SAM'
+  | 'BiRefNet'
+  | 'ViT'
+  | 'Face Restore';
 
 export interface ProdiaModel {
   /** Stable slug derived from the type string. */
@@ -43,8 +56,11 @@ export interface ProdiaModel {
   family: ModelFamily;
   medium: MediaMode;
   operation: Operation;
+  inputKind?: InputKind;
+  outputKind?: OutputKind;
   desc: string;
   badge?: string;
+  defaults?: JobConfig;
   /**
    * Number of binary input images the job expects:
    * 0 = txt2img / txt2vid, 1 = img2img / edit / upscale / removebg / img2vid,
@@ -125,9 +141,13 @@ export interface RunJobRequest {
 
 /** Response shape returned by `/api/job`. */
 export interface RunJobResponse {
-  url: string;
+  url: string | null;
   /** Secondary output (e.g. the mask from remove-background). */
   maskUrl?: string | null;
+  /** All binary media outputs in response order. Segmentation can return many. */
+  outputs?: string[];
+  /** Parsed JSON outputs such as ViT labels. */
+  metadata?: Record<string, unknown> | null;
   video: boolean;
   mimeType: string;
   price?: PriceInfo | null;

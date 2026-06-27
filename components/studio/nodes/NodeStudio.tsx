@@ -88,6 +88,7 @@ const Inner: React.FC<NodeStudioProps> = ({ apiKey, params, trackCost, theme, on
   const clear = useGraphStore((s) => s.clear);
   const exportJSON = useGraphStore((s) => s.exportJSON);
   const importJSON = useGraphStore((s) => s.importJSON);
+  const accentId = useStudio((s) => s.accent);
 
   const [busy, setBusy] = useState(false);
   const [toast, setToast] = useState<{ text: string; tone: 'ok' | 'err' } | null>(null);
@@ -144,6 +145,9 @@ const Inner: React.FC<NodeStudioProps> = ({ apiKey, params, trackCost, theme, on
         status: 'done',
         url: node.data.output,
         isVideo: !!node.data.outputIsVideo,
+        outputs: node.data.outputs as string[] | undefined,
+        metadata: node.data.metadata as Record<string, unknown> | null | undefined,
+        mimeType: node.data.mimeType as string | undefined,
         prompt: node.data.text ?? '',
         modelType: model?.type ?? '',
         modelLabel: model?.label ?? node.data.type,
@@ -316,11 +320,13 @@ const Inner: React.FC<NodeStudioProps> = ({ apiKey, params, trackCost, theme, on
     [theme, doRun, busy],
   );
 
-  // MiniMap fills SVG via attribute (no CSS vars) — resolve real accent colors.
-  const minimapColor = useCallback((n: GraphNode) => {
-    const acc = getAccent(useStudio.getState().accent);
-    return getSpec(n.data.type).category === 'transform' ? acc.c2 : acc.c1;
-  }, []);
+  // MiniMap fills SVG via attributes, so resolve real theme colors.
+  const activeAccent = useMemo(() => getAccent(accentId), [accentId]);
+  const minimapColor = useCallback(
+    (n: GraphNode) => (getSpec(n.data.type).category === 'transform' ? activeAccent.c2 : activeAccent.c1),
+    [activeAccent],
+  );
+  const minimapMask = theme === 'light' ? `${activeAccent.c1}18` : `${activeAccent.c2}66`;
 
   return (
     <NodeHostContext.Provider value={host}>
@@ -420,7 +426,7 @@ const Inner: React.FC<NodeStudioProps> = ({ apiKey, params, trackCost, theme, on
             zoomable
             nodeColor={minimapColor}
             nodeStrokeWidth={3}
-            maskColor={theme === 'light' ? 'rgba(120,40,110,0.08)' : 'rgba(8,2,12,0.6)'}
+            maskColor={minimapMask}
             style={{ background: pal.panel2, border: `1px solid ${pal.line}`, borderRadius: 12 }}
           />
         </ReactFlow>

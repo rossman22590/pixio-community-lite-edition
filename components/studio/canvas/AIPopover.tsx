@@ -17,13 +17,27 @@ import {
   Brush,
   ReplaceAll,
   Plus,
+  Scissors,
+  UserCheck,
+  FileCode2,
 } from 'lucide-react';
 import { TOKENS } from '../../../lib/studio/types';
 import { editModels } from '../../../lib/prodia/catalog';
 import { ModelPicker } from './ModelPicker';
 import { Spinner } from './ui';
 
-export type AIActionKind = 'edit-replace' | 'edit-new' | 'removebg' | 'upscale' | 'variation' | 'describe' | 'mask';
+export type AIActionKind =
+  | 'edit-replace'
+  | 'edit-new'
+  | 'removebg'
+  | 'upscale'
+  | 'variation'
+  | 'describe'
+  | 'mask'
+  | 'segment'
+  | 'classify'
+  | 'facerestore'
+  | 'vectorize';
 
 export interface AIActionState {
   busy: boolean;
@@ -142,6 +156,34 @@ export const AIPopover: React.FC<{
               label="Describe"
               busy={state.busy && state.label === 'Describing'}
               onClick={() => run('describe')}
+              disabled={state.busy}
+            />
+            <Quick
+              icon={<Scissors size={15} />}
+              label="Segment"
+              busy={state.busy && state.label === 'Segmenting'}
+              onClick={() => run('segment')}
+              disabled={state.busy}
+            />
+            <Quick
+              icon={<ScanEye size={15} />}
+              label="Labels"
+              busy={state.busy && state.label === 'Classifying'}
+              onClick={() => run('classify')}
+              disabled={state.busy}
+            />
+            <Quick
+              icon={<UserCheck size={15} />}
+              label="Restore"
+              busy={state.busy && state.label === 'Restoring'}
+              onClick={() => run('facerestore')}
+              disabled={state.busy}
+            />
+            <Quick
+              icon={<FileCode2 size={15} />}
+              label="Vector"
+              busy={state.busy && state.label === 'Vectorizing'}
+              onClick={() => run('vectorize')}
               disabled={state.busy}
             />
             <Quick

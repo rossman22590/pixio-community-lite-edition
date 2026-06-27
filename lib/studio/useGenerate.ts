@@ -63,8 +63,11 @@ export function useGenerate() {
         .then((res) =>
           updateAsset(id, {
             status: 'done',
-            url: res.url,
+            url: res.url ?? undefined,
             isVideo: res.video,
+            outputs: res.outputs,
+            metadata: res.metadata,
+            mimeType: res.mimeType,
             price: res.price?.dollars ?? null,
           }),
         )

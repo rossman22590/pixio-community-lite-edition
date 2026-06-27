@@ -41,36 +41,20 @@ export interface Palette {
   nodeHeaderTint: string;
 }
 
-export const paletteFor = (theme: Theme): Palette =>
-  theme === 'light'
-    ? {
-        bg: '#fbf3fb',
-        panel: 'rgba(255,255,255,0.78)',
-        panel2: 'rgba(255,255,255,0.92)',
-        line: 'rgba(120,40,110,0.16)',
-        lineStrong: 'rgba(120,40,110,0.32)',
-        text: '#2a0e2e',
-        muted: 'rgba(70,20,70,0.62)',
-        faint: 'rgba(70,20,70,0.40)',
-        field: 'rgba(255,255,255,0.7)',
-        fieldLine: 'rgba(120,40,110,0.2)',
-        nodeBg: 'rgba(255,250,254,0.86)',
-        nodeHeaderTint: 'rgba(255,255,255,0.5)',
-      }
-    : {
-        bg: TOKENS.bg,
-        panel: 'rgba(27,10,34,0.72)',
-        panel2: 'rgba(37,16,47,0.82)',
-        line: TOKENS.line,
-        lineStrong: TOKENS.lineStrong,
-        text: TOKENS.text,
-        muted: TOKENS.muted,
-        faint: TOKENS.faint,
-        field: 'rgba(8,2,12,0.45)',
-        fieldLine: 'rgba(255,214,242,0.16)',
-        nodeBg: 'rgba(27,10,34,0.78)',
-        nodeHeaderTint: 'rgba(255,255,255,0.04)',
-      };
+export const paletteFor = (_theme: Theme): Palette => ({
+  bg: TOKENS.bg,
+  panel: 'color-mix(in srgb, var(--panel) 88%, transparent)',
+  panel2: 'color-mix(in srgb, var(--panel-2) 94%, transparent)',
+  line: TOKENS.line,
+  lineStrong: TOKENS.lineStrong,
+  text: TOKENS.text,
+  muted: TOKENS.muted,
+  faint: TOKENS.faint,
+  field: 'color-mix(in srgb, var(--pink) 8%, transparent)',
+  fieldLine: 'color-mix(in srgb, var(--pink) 22%, transparent)',
+  nodeBg: 'color-mix(in srgb, var(--panel) 90%, transparent)',
+  nodeHeaderTint: 'color-mix(in srgb, var(--pink) 7%, transparent)',
+});
 
 // ── typed handle ─────────────────────────────────────────────────────────────
 interface PortHandleProps {
@@ -237,10 +221,10 @@ export const NodeFrame: React.FC<NodeFrameProps> = ({
         background: pal.nodeBg,
         borderColor: selected ? accent : pal.line,
         boxShadow: selected
-          ? `0 0 0 1px ${accent}, 0 18px 50px rgba(8,2,12,0.5), 0 0 30px ${accent}40`
+          ? `var(--shadow), 0 0 0 1px ${accent}, 0 0 30px color-mix(in srgb, ${accent} 36%, transparent)`
           : status === 'running'
-            ? `0 0 0 1px ${TOKENS.cyan}66, 0 18px 50px rgba(8,2,12,0.5)`
-            : '0 18px 44px rgba(8,2,12,0.42)',
+            ? `var(--shadow), 0 0 0 1px color-mix(in srgb, ${TOKENS.cyan} 55%, transparent)`
+            : TOKENS.shadow,
       }}
     >
       {/* accent rail */}

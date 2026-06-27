@@ -20,7 +20,7 @@ export const saveApiKey = (key: string) => {
 export async function runJob(req: RunJobRequest): Promise<RunJobResponse> {
   const apiKey = req.apiKey ?? loadApiKey();
   const { data } = await axios.post('/api/job', { ...req, apiKey: apiKey || undefined });
-  if (!data?.url) throw new Error(data?.message ?? 'Prodia returned no output.');
+  if (!data?.url && !data?.metadata) throw new Error(data?.message ?? 'Prodia returned no output.');
   return data as RunJobResponse;
 }
 

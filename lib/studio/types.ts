@@ -12,6 +12,9 @@ export interface StudioAsset {
   status: 'running' | 'done' | 'error';
   url?: string;
   isVideo?: boolean;
+  outputs?: string[];
+  metadata?: Record<string, unknown> | null;
+  mimeType?: string;
   prompt: string;
   modelType: string;
   modelLabel: string;

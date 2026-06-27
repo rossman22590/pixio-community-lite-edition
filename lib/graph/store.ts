@@ -20,6 +20,7 @@ import { create } from 'zustand';
 import {
   getSpec,
   isValidConnection as validateConnection,
+  resolveOutputDataType,
   type DataType,
   type NodeType,
 } from './registry';
@@ -41,6 +42,9 @@ export interface GraphNodeData {
   status: NodeStatus;
   /** Output data URL produced by the last successful run. */
   output?: string;
+  outputs?: string[];
+  metadata?: Record<string, unknown> | null;
+  mimeType?: string;
   /** Whether the output is a video. */
   outputIsVideo?: boolean;
   /** Last error message, if status === 'error'. */
@@ -172,7 +176,8 @@ export const useGraphStore = create<GraphState>((set, get) => ({
 
     const sourceType = nodeTypeOf(nodes)(conn.source!);
     const out = sourceType ? getSpec(sourceType).outputs.find((p) => p.id === conn.sourceHandle) : undefined;
-    const dataType: DataType = out?.dataType ?? 'image';
+    const sourceModelId = conn.source ? modelIdOf(nodes)(conn.source) : undefined;
+    const dataType: DataType = sourceType ? resolveOutputDataType(sourceType, sourceModelId) : (out?.dataType ?? 'image');
 
     const edge: Edge = {
       ...conn,
@@ -235,6 +240,9 @@ export const useGraphStore = create<GraphState>((set, get) => ({
         text: n.data.text,
         source: n.data.source,
         output: n.data.output,
+        outputs: n.data.outputs,
+        metadata: n.data.metadata,
+        mimeType: n.data.mimeType,
         outputIsVideo: n.data.outputIsVideo,
         label: n.data.label,
         status: n.data.output ? ('done' as NodeStatus) : ('idle' as NodeStatus),

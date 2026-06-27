@@ -21,14 +21,31 @@ export function buildConfig(
 ): JobConfig {
   const t = has(model.type);
   const prompt = (promptOverride ?? params.prompt).trim();
-  const config: JobConfig = {};
+  const config: JobConfig = { ...(model.defaults ?? {}) };
 
-  // removebg/upscale jobs do not take a prompt at all.
-  const promptless = model.operation === 'removebg' || model.operation === 'upscale';
-  if (!promptless && prompt) config.prompt = prompt;
+  const promptCapable =
+    model.operation === 'txt2img' ||
+    model.operation === 'img2img' ||
+    model.operation === 'edit' ||
+    model.operation === 'inpaint' ||
+    model.operation === 'upscale' ||
+    model.operation === 'txt2vid' ||
+    model.operation === 'img2vid' ||
+    model.operation === 'vid2vid' ||
+    model.operation === 'aud2vid' ||
+    model.operation === 'vectorize' ||
+    (model.operation === 'segment' && (t('sam3') || t('segment.v2')));
+  if (promptCapable && prompt) config.prompt = prompt;
 
   const neg = params.negativePrompt.trim();
-  if (neg && !promptless) config.negative_prompt = neg;
+  const negativeCapable =
+    model.operation === 'txt2img' ||
+    model.operation === 'img2img' ||
+    model.operation === 'edit' ||
+    model.operation === 'inpaint' ||
+    model.operation === 'txt2vid' ||
+    model.operation === 'img2vid';
+  if (neg && negativeCapable) config.negative_prompt = neg;
 
   const seed = () => {
     if (params.seed !== -1) config.seed = params.seed;
@@ -98,11 +115,49 @@ export function buildConfig(
       break;
     }
 
+    case 'vectorize': {
+      const ratioToSize: Record<string, string> = {
+        '1:1': '1024x1024',
+        '16:9': '1536x768',
+        '9:16': '768x1536',
+        '4:3': '1280x896',
+        '3:4': '896x1280',
+        '3:2': '1216x896',
+        '2:3': '896x1216',
+        '21:9': '1536x768',
+        '9:21': '768x1536',
+      };
+      config.size = ratioToSize[params.aspectRatio] ?? '1024x1024';
+      break;
+    }
+
+    case 'segment': {
+      if (t('sam3') || t('segment.v2')) {
+        if (!config.prompt) config.prompt = prompt || 'main subject';
+        config.confidence_threshold = 0.5;
+      }
+      break;
+    }
+
+    case 'classify': {
+      break;
+    }
+
+    case 'facerestore': {
+      config.upscale = 1;
+      break;
+    }
+
     case 'txt2vid':
-    case 'img2vid': {
+    case 'img2vid':
+    case 'vid2vid':
+    case 'aud2vid': {
       // img2vid models still require a prompt — supply a sensible motion default.
-      if (model.operation === 'img2vid' && !config.prompt) {
+      if ((model.operation === 'img2vid' || model.operation === 'vid2vid') && !config.prompt) {
         config.prompt = 'subtle, natural cinematic motion';
+      }
+      if (model.operation === 'aud2vid' && !config.prompt) {
+        config.prompt = 'cinematic music video synced to the audio';
       }
       if (t('veo')) {
         // Veo only accepts a strict subset: 16:9 | 9:16, duration 4 | 6 | 8.
@@ -113,6 +168,26 @@ export function buildConfig(
         if (t('v2')) config.generate_audio = params.generateAudio;
       } else if (t('seedance') || t('kling') || t('sora')) {
         config.aspect_ratio = params.aspectRatio === '9:16' ? '9:16' : '16:9';
+      } else if (model.operation === 'vid2vid') {
+        const runwayAspect: Record<string, string> = {
+          '16:9': '1280:720',
+          '9:16': '720:1280',
+          '4:3': '1104:832',
+          '3:4': '832:1104',
+          '1:1': '960:960',
+          '21:9': '1584:672',
+        };
+        config.aspect_ratio = runwayAspect[params.aspectRatio] ?? '1280:720';
+        config.public_figure_moderation = 'auto';
+        seed();
+      } else if (model.operation === 'aud2vid') {
+        config.resolution = params.resolution === '1080p' ? '1080p' : '720p';
+        config.aspect_ratio = ['16:9', '9:16', '4:3', '3:4', '3:2', '2:3', '1:1'].includes(params.aspectRatio)
+          ? params.aspectRatio
+          : '16:9';
+        config.fps = 24;
+        config.prompt_upsampling = params.promptUpsampling;
+        seed();
       }
       break;
     }

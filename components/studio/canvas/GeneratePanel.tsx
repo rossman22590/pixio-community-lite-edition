@@ -46,7 +46,7 @@ export const GeneratePanel: React.FC<{
         value={prompt}
         rows={4}
         autoFocus
-        placeholder="A serene plum-toned mountain lake at dawn, volumetric mist, cinematic…"
+        placeholder="A serene accent-lit mountain lake at dawn, volumetric mist, cinematic..."
         onChange={(e) => setPrompt(e.target.value)}
         onKeyDown={(e) => {
           if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {

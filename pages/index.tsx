@@ -153,7 +153,7 @@ export default function Home() {
   if (!mounted) return null;
   const running = assets.filter((a) => a.status === 'running').length;
   const activeIndex = Math.max(0, MODES.findIndex((m) => m.key === surface));
-  const accentStyle = accentVars(getAccent(accent));
+  const accentStyle = accentVars(getAccent(accent), theme);
   const accentC1 = getAccent(accent).c1;
 
   return (

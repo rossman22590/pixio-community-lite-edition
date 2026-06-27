@@ -8,18 +8,24 @@
 
 import type { Connection, Edge } from '@xyflow/react';
 import {
+  AUD2VID_MODELS,
+  CLASSIFY_MODELS,
+  FACE_RESTORE_MODELS,
   IMG2VID_MODELS,
   INPAINT_MODELS,
+  SEGMENT_MODELS,
   TXT2IMG_MODELS,
   TXT2VID_MODELS,
   UTILITY_MODELS,
+  VECTOR_MODELS,
+  VID2VID_MODELS,
   editModels,
   getModel,
 } from '../prodia/catalog';
 import type { Operation, ProdiaModel } from '../prodia/types';
 
 // ── Data types that flow along edges ────────────────────────────────────────
-export type DataType = 'text' | 'image' | 'video' | 'number';
+export type DataType = 'text' | 'image' | 'video' | 'audio' | 'number';
 
 /** A coloured, typed handle on a node. */
 export interface HandlePort {
@@ -35,12 +41,20 @@ export type NodeCategory = 'input' | 'generate' | 'transform' | 'output';
 export type NodeType =
   | 'prompt'
   | 'imageInput'
+  | 'videoInput'
+  | 'audioInput'
   | 'generate'
+  | 'vectorize'
   | 'edit'
   | 'inpaint'
   | 'upscale'
   | 'removebg'
+  | 'segment'
+  | 'classify'
+  | 'facerestore'
   | 'animate'
+  | 'vid2vid'
+  | 'aud2vid'
   | 'output';
 
 export interface NodeSpec {
@@ -65,6 +79,7 @@ export const DATA_TYPE_COLORS: Record<DataType, string> = {
   text: 'var(--pink)',
   image: 'var(--violet)',
   video: 'var(--violet)',
+  audio: 'var(--pink)',
   number: 'var(--pink)',
 };
 
@@ -72,6 +87,7 @@ export const DATA_TYPE_LABELS: Record<DataType, string> = {
   text: 'Text',
   image: 'Image',
   video: 'Video',
+  audio: 'Audio',
   number: 'Number',
 };
 
@@ -101,6 +117,28 @@ export const NODE_SPECS: Record<NodeType, NodeSpec> = {
     models: [],
   },
 
+  videoInput: {
+    type: 'videoInput',
+    title: 'Video',
+    subtitle: 'Upload or URL',
+    category: 'input',
+    inputs: [],
+    outputs: [{ id: 'video', dataType: 'video', label: 'Video' }],
+    accent: 'var(--violet)',
+    models: [],
+  },
+
+  audioInput: {
+    type: 'audioInput',
+    title: 'Audio',
+    subtitle: 'Upload or URL',
+    category: 'input',
+    inputs: [],
+    outputs: [{ id: 'audio', dataType: 'audio', label: 'Audio' }],
+    accent: 'var(--pink)',
+    models: [],
+  },
+
   generate: {
     type: 'generate',
     title: 'Generate',
@@ -117,6 +155,19 @@ export const NODE_SPECS: Record<NodeType, NodeSpec> = {
     accent: 'var(--pink)',
     models: [...TXT2IMG_MODELS, ...TXT2VID_MODELS],
     defaultModel: first(TXT2IMG_MODELS),
+  },
+
+  vectorize: {
+    type: 'vectorize',
+    title: 'Vectorize',
+    subtitle: 'Text -> SVG',
+    operation: 'vectorize',
+    category: 'generate',
+    inputs: [{ id: 'prompt', dataType: 'text', label: 'Prompt' }],
+    outputs: [{ id: 'image', dataType: 'image', label: 'SVG' }],
+    accent: 'var(--violet)',
+    models: VECTOR_MODELS,
+    defaultModel: first(VECTOR_MODELS),
   },
 
   edit: {
@@ -178,6 +229,48 @@ export const NODE_SPECS: Record<NodeType, NodeSpec> = {
     defaultModel: first(UTILITY_MODELS.filter((model) => model.operation === 'removebg')),
   },
 
+  segment: {
+    type: 'segment',
+    title: 'Segment',
+    subtitle: 'Object masks',
+    operation: 'segment',
+    category: 'transform',
+    inputs: [
+      { id: 'image', dataType: 'image', label: 'Image' },
+      { id: 'prompt', dataType: 'text', label: 'Prompt' },
+    ],
+    outputs: [{ id: 'image', dataType: 'image', label: 'Mask' }],
+    accent: 'var(--pink)',
+    models: SEGMENT_MODELS,
+    defaultModel: first(SEGMENT_MODELS),
+  },
+
+  classify: {
+    type: 'classify',
+    title: 'Classify',
+    subtitle: 'Labels / NSFW',
+    operation: 'classify',
+    category: 'transform',
+    inputs: [{ id: 'image', dataType: 'image', label: 'Image' }],
+    outputs: [{ id: 'image', dataType: 'image', label: 'Image' }],
+    accent: 'var(--violet)',
+    models: CLASSIFY_MODELS,
+    defaultModel: first(CLASSIFY_MODELS),
+  },
+
+  facerestore: {
+    type: 'facerestore',
+    title: 'Face Restore',
+    subtitle: 'Portrait repair',
+    operation: 'facerestore',
+    category: 'transform',
+    inputs: [{ id: 'image', dataType: 'image', label: 'Image' }],
+    outputs: [{ id: 'image', dataType: 'image', label: 'Image' }],
+    accent: 'var(--pink)',
+    models: FACE_RESTORE_MODELS,
+    defaultModel: first(FACE_RESTORE_MODELS),
+  },
+
   animate: {
     type: 'animate',
     title: 'Animate',
@@ -192,6 +285,38 @@ export const NODE_SPECS: Record<NodeType, NodeSpec> = {
     accent: 'var(--pink)',
     models: IMG2VID_MODELS,
     defaultModel: first(IMG2VID_MODELS),
+  },
+
+  vid2vid: {
+    type: 'vid2vid',
+    title: 'Transform Video',
+    subtitle: 'Runway Gen-4',
+    operation: 'vid2vid',
+    category: 'transform',
+    inputs: [
+      { id: 'video', dataType: 'video', label: 'Video' },
+      { id: 'prompt', dataType: 'text', label: 'Prompt' },
+    ],
+    outputs: [{ id: 'video', dataType: 'video', label: 'Video' }],
+    accent: 'var(--pink)',
+    models: VID2VID_MODELS,
+    defaultModel: first(VID2VID_MODELS),
+  },
+
+  aud2vid: {
+    type: 'aud2vid',
+    title: 'Audio to Video',
+    subtitle: 'Pruna P-Video',
+    operation: 'aud2vid',
+    category: 'transform',
+    inputs: [
+      { id: 'audio', dataType: 'audio', label: 'Audio' },
+      { id: 'prompt', dataType: 'text', label: 'Prompt' },
+    ],
+    outputs: [{ id: 'video', dataType: 'video', label: 'Video' }],
+    accent: 'var(--violet)',
+    models: AUD2VID_MODELS,
+    defaultModel: first(AUD2VID_MODELS),
   },
 
   output: {
@@ -224,12 +349,12 @@ export interface PaletteGroup {
 }
 
 export const PALETTE_GROUPS: PaletteGroup[] = [
-  { category: 'input', label: 'Inputs', types: ['prompt', 'imageInput'] },
-  { category: 'generate', label: 'Generate', types: ['generate'] },
+  { category: 'input', label: 'Inputs', types: ['prompt', 'imageInput', 'videoInput', 'audioInput'] },
+  { category: 'generate', label: 'Generate', types: ['generate', 'vectorize'] },
   {
     category: 'transform',
     label: 'Transform',
-    types: ['edit', 'inpaint', 'upscale', 'removebg', 'animate'],
+    types: ['edit', 'inpaint', 'upscale', 'removebg', 'segment', 'classify', 'facerestore', 'animate', 'vid2vid', 'aud2vid'],
   },
   { category: 'output', label: 'Output', types: ['output'] },
 ];
