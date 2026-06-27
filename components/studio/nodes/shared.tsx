@@ -100,7 +100,7 @@ export const PortHandle: React.FC<PortHandleProps> = ({ port, type, top, pal }) 
         style={{
           background: color,
           borderColor: pal.nodeBg,
-          boxShadow: `0 0 0 1px ${color}55, 0 0 10px ${color}66`,
+          boxShadow: `0 0 0 1px color-mix(in srgb, ${color} 34%, transparent), 0 0 10px color-mix(in srgb, ${color} 42%, transparent)`,
         }}
       />
       <style jsx>{`

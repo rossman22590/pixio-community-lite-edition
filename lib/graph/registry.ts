@@ -59,12 +59,13 @@ export interface NodeSpec {
   defaultModel?: string;
 }
 
-// ── Colour per data type — handles + edges are colour-coded by what flows ────
+// ── Colour per data type — driven by the two accent vars so the whole graph
+//    recolors with the chosen accent (text/number = primary, image/video = secondary)
 export const DATA_TYPE_COLORS: Record<DataType, string> = {
-  text: '#ff8fcf', // pinkSoft — language
-  image: '#a855f7', // violet — pixels
-  video: '#22d3ee', // cyan — motion
-  number: '#34d399', // mint — scalars
+  text: 'var(--pink)',
+  image: 'var(--violet)',
+  video: 'var(--violet)',
+  number: 'var(--pink)',
 };
 
 export const DATA_TYPE_LABELS: Record<DataType, string> = {
@@ -85,7 +86,7 @@ export const NODE_SPECS: Record<NodeType, NodeSpec> = {
     category: 'input',
     inputs: [],
     outputs: [{ id: 'text', dataType: 'text', label: 'Prompt' }],
-    accent: '#ff8fcf',
+    accent: 'var(--pink)',
     models: [],
   },
 
@@ -96,7 +97,7 @@ export const NODE_SPECS: Record<NodeType, NodeSpec> = {
     category: 'input',
     inputs: [],
     outputs: [{ id: 'image', dataType: 'image', label: 'Image' }],
-    accent: '#a855f7',
+    accent: 'var(--violet)',
     models: [],
   },
 
@@ -113,7 +114,7 @@ export const NODE_SPECS: Record<NodeType, NodeSpec> = {
       { id: 'image', dataType: 'image', label: 'Image' },
       { id: 'video', dataType: 'video', label: 'Video' },
     ],
-    accent: '#ff5fb7',
+    accent: 'var(--pink)',
     models: [...TXT2IMG_MODELS, ...TXT2VID_MODELS],
     defaultModel: first(TXT2IMG_MODELS),
   },
@@ -129,7 +130,7 @@ export const NODE_SPECS: Record<NodeType, NodeSpec> = {
       { id: 'prompt', dataType: 'text', label: 'Instruction' },
     ],
     outputs: [{ id: 'image', dataType: 'image', label: 'Image' }],
-    accent: '#22d3ee',
+    accent: 'var(--violet)',
     models: editModels(),
     defaultModel: first(editModels()),
   },
@@ -146,7 +147,7 @@ export const NODE_SPECS: Record<NodeType, NodeSpec> = {
       { id: 'prompt', dataType: 'text', label: 'Prompt' },
     ],
     outputs: [{ id: 'image', dataType: 'image', label: 'Image' }],
-    accent: '#a78bfa',
+    accent: 'var(--violet)',
     models: INPAINT_MODELS,
     defaultModel: first(INPAINT_MODELS),
   },
@@ -159,7 +160,7 @@ export const NODE_SPECS: Record<NodeType, NodeSpec> = {
     category: 'transform',
     inputs: [{ id: 'image', dataType: 'image', label: 'Image' }],
     outputs: [{ id: 'image', dataType: 'image', label: 'Image' }],
-    accent: '#94a3b8',
+    accent: 'var(--pink)',
     models: UTILITY_MODELS.filter((model) => model.operation === 'upscale'),
     defaultModel: first(UTILITY_MODELS.filter((model) => model.operation === 'upscale')),
   },
@@ -172,7 +173,7 @@ export const NODE_SPECS: Record<NodeType, NodeSpec> = {
     category: 'transform',
     inputs: [{ id: 'image', dataType: 'image', label: 'Image' }],
     outputs: [{ id: 'image', dataType: 'image', label: 'Cutout' }],
-    accent: '#34d399',
+    accent: 'var(--violet)',
     models: UTILITY_MODELS.filter((model) => model.operation === 'removebg'),
     defaultModel: first(UTILITY_MODELS.filter((model) => model.operation === 'removebg')),
   },
@@ -188,7 +189,7 @@ export const NODE_SPECS: Record<NodeType, NodeSpec> = {
       { id: 'prompt', dataType: 'text', label: 'Motion' },
     ],
     outputs: [{ id: 'video', dataType: 'video', label: 'Video' }],
-    accent: '#a78bfa',
+    accent: 'var(--pink)',
     models: IMG2VID_MODELS,
     defaultModel: first(IMG2VID_MODELS),
   },
@@ -203,7 +204,7 @@ export const NODE_SPECS: Record<NodeType, NodeSpec> = {
       { id: 'video', dataType: 'video', label: 'Video' },
     ],
     outputs: [],
-    accent: '#ff4ecb',
+    accent: 'var(--pink)',
     models: [],
   },
 };

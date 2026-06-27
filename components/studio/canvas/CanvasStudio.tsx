@@ -80,6 +80,8 @@ export interface CanvasStudioProps {
   theme: Theme;
   seedImages?: { url: string; isVideo?: boolean }[];
   onAsset?: (a: StudioAsset) => void;
+  /** Resolved primary accent color (real hex) for Konva selection chrome. */
+  accentColor?: string;
 }
 
 interface Toast {
@@ -111,7 +113,10 @@ const CanvasStudio: React.FC<CanvasStudioProps> = ({
   theme,
   seedImages,
   onAsset,
+  accentColor = '#ff4ecb',
 }) => {
+  // Konva (canvas 2D) cannot resolve CSS vars — compute real colors here.
+  const gridStroke = theme === 'light' ? 'rgba(120,50,140,0.12)' : 'rgba(255,214,242,0.10)';
   /* ── refs ──────────────────────────────────────────────────────────────── */
   const containerRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<Konva.Stage>(null);
@@ -386,7 +391,7 @@ const CanvasStudio: React.FC<CanvasStudioProps> = ({
 
   const placeShape = useCallback(
     (kind: 'rect' | 'ellipse', pt: { x: number; y: number }) => {
-      const el = makeShapeElement(kind, { x: pt.x - 140, y: pt.y - 100 });
+      const el = makeShapeElement(kind, { x: pt.x - 140, y: pt.y - 100, fill: accentColor });
       addElement(el);
       setTool('select');
     },
@@ -1171,10 +1176,10 @@ const CanvasStudio: React.FC<CanvasStudioProps> = ({
             {/* grid layer (non-interactive) */}
             <Layer listening={false}>
               {grid.vertical.map((x, i) => (
-                <Line key={`v${i}`} points={[x, grid.top, x, grid.bottom]} stroke={TOKENS.line} strokeWidth={1 / vp.scale} />
+                <Line key={`v${i}`} points={[x, grid.top, x, grid.bottom]} stroke={gridStroke} strokeWidth={1 / vp.scale} />
               ))}
               {grid.horizontal.map((y, i) => (
-                <Line key={`h${i}`} points={[grid.left, y, grid.right, y]} stroke={TOKENS.line} strokeWidth={1 / vp.scale} />
+                <Line key={`h${i}`} points={[grid.left, y, grid.right, y]} stroke={gridStroke} strokeWidth={1 / vp.scale} />
               ))}
             </Layer>
 
@@ -1192,6 +1197,7 @@ const CanvasStudio: React.FC<CanvasStudioProps> = ({
                   onDblClick={el.type === 'text' ? () => setEditingTextId(el.id) : undefined}
                   maskMode={inMaskMode && el.id === maskTargetId}
                   maskStrokes={el.id === maskTargetId ? maskStrokes : []}
+                  accentColor={accentColor}
                 />
               ))}
 
@@ -1200,9 +1206,9 @@ const CanvasStudio: React.FC<CanvasStudioProps> = ({
                 <Transformer
                   ref={trRef}
                   rotateEnabled
-                  borderStroke={TOKENS.pink}
+                  borderStroke={accentColor}
                   borderStrokeWidth={1.5}
-                  anchorStroke={TOKENS.pink}
+                  anchorStroke={accentColor}
                   anchorFill="#fff"
                   anchorSize={9}
                   anchorCornerRadius={5}
@@ -1347,7 +1353,7 @@ const CanvasStudio: React.FC<CanvasStudioProps> = ({
           height: 26px;
           border-radius: 8px;
           background: ${TOKENS.accent};
-          box-shadow: 0 4px 14px rgba(255, 78, 203, 0.4);
+          box-shadow: 0 4px 14px color-mix(in srgb, var(--pink) 40%, transparent);
         }
         .bname {
           font-weight: 800;
@@ -1407,7 +1413,7 @@ const CanvasStudio: React.FC<CanvasStudioProps> = ({
           background: ${TOKENS.accent};
           border-color: transparent;
           color: #fff;
-          box-shadow: 0 8px 20px rgba(255, 78, 203, 0.28);
+          box-shadow: 0 8px 20px color-mix(in srgb, var(--pink) 28%, transparent);
         }
         .tbtn.primary:hover:not(:disabled) {
           filter: brightness(1.06);
@@ -1456,7 +1462,7 @@ const CanvasStudio: React.FC<CanvasStudioProps> = ({
           overflow: hidden;
           background: radial-gradient(
               1200px 700px at 50% -10%,
-              rgba(168, 85, 247, 0.1),
+              color-mix(in srgb, var(--violet) 10%, transparent),
               transparent 60%
             ),
             ${TOKENS.bg};
@@ -1522,37 +1528,40 @@ const CanvasStudio: React.FC<CanvasStudioProps> = ({
           background: ${TOKENS.accent};
           border-color: transparent;
           color: #fff;
-          box-shadow: 0 8px 20px rgba(255, 78, 203, 0.3);
+          box-shadow: 0 8px 20px color-mix(in srgb, var(--pink) 30%, transparent);
         }
         .ebtns button :global(svg) {
           color: inherit;
         }
         .toasts {
           position: absolute;
-          top: 16px;
+          bottom: 20px;
           left: 50%;
           transform: translateX(-50%);
           display: flex;
           flex-direction: column;
+          align-items: center;
           gap: 8px;
           z-index: 70;
           pointer-events: none;
         }
         .toast {
-          padding: 10px 16px;
-          border-radius: ${TOKENS.radiusSm}px;
+          padding: 9px 16px;
+          border-radius: 999px;
           font-size: 12.5px;
           font-weight: 600;
           color: ${TOKENS.text};
-          background: ${TOKENS.panel2};
+          background: rgba(20, 10, 26, 0.7);
           border: 1px solid ${TOKENS.lineStrong};
           box-shadow: ${TOKENS.shadow};
-          animation: toastin 0.2s ease-out;
+          backdrop-filter: blur(18px);
+          -webkit-backdrop-filter: blur(18px);
+          animation: toastin 0.22s cubic-bezier(0.22, 1, 0.36, 1);
         }
         @keyframes toastin {
           from {
             opacity: 0;
-            transform: translateY(-8px);
+            transform: translateY(10px);
           }
         }
         .toast.error {
@@ -1627,7 +1636,7 @@ const InlineTextEditor: React.FC<{
         resize: 'none',
         overflow: 'hidden',
         zIndex: 45,
-        boxShadow: '0 0 0 3px rgba(255,78,203,0.18)',
+        boxShadow: '0 0 0 3px color-mix(in srgb, var(--pink) 18%, transparent)',
       }}
     />
   );

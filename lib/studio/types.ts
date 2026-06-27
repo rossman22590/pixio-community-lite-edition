@@ -22,27 +22,30 @@ export interface StudioAsset {
   error?: string;
 }
 
-/** Canonical design tokens. Kept in JS so every surface (incl. Konva, which has
- *  no CSS) shares one palette. Mirrors the CSS custom properties in index.css. */
+/** Canonical design tokens. Colors reference the CSS custom properties defined
+ *  in index.css (and overridden by [data-theme] + the accent system), so every
+ *  surface that styles via HTML/styled-jsx recolors live with theme + accent.
+ *  NOTE: these resolve via CSS — do NOT feed them to Konva fill/stroke (canvas
+ *  2D can't parse var()); compute real colors there instead. */
 export const TOKENS = {
-  bg: '#120716',
-  panel: '#1b0a22',
-  panel2: '#25102f',
-  line: 'rgba(255,214,242,0.13)',
-  lineStrong: 'rgba(255,214,242,0.26)',
-  text: '#fff4fb',
-  muted: 'rgba(255,229,247,0.66)',
-  faint: 'rgba(255,229,247,0.40)',
-  pink: '#ff4ecb',
-  pinkSoft: '#ff8fcf',
-  violet: '#a855f7',
-  magenta: '#ec4899',
-  cyan: '#22d3ee',
-  mint: '#34d399',
-  danger: '#fb7185',
-  accent: 'linear-gradient(135deg,#ff5fb7,#a855f7)',
+  bg: 'var(--bg)',
+  panel: 'var(--panel)',
+  panel2: 'var(--panel-2)',
+  line: 'var(--line)',
+  lineStrong: 'var(--line-strong)',
+  text: 'var(--text)',
+  muted: 'var(--muted)',
+  faint: 'var(--faint)',
+  pink: 'var(--pink)',
+  pinkSoft: 'var(--pink-soft)',
+  violet: 'var(--violet)',
+  magenta: 'var(--magenta)',
+  cyan: 'var(--cyan)',
+  mint: 'var(--mint)',
+  danger: 'var(--danger)',
+  accent: 'var(--accent)',
   radius: 14,
   radiusSm: 10,
-  shadow: '0 18px 50px rgba(8,2,12,0.55)',
-  font: "Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif",
+  shadow: 'var(--shadow)',
+  font: 'var(--font)',
 } as const;

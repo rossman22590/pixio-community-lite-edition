@@ -32,6 +32,8 @@ import {
   Upload,
 } from 'lucide-react';
 import { TOKENS, type StudioAsset, type Theme } from '../../../lib/studio/types';
+import { getAccent } from '../../../lib/studio/theme';
+import { useStudio } from '../../../lib/studio/store';
 import type { GenerationParams } from '../../../lib/prodia/types';
 import { getModel } from '../../../lib/prodia/catalog';
 import {
@@ -54,6 +56,8 @@ export interface NodeStudioProps {
   trackCost: boolean;
   theme: Theme;
   onAsset?: (a: StudioAsset) => void;
+  /** An image data URL handed off from another surface; dropped in as an Image node. */
+  seedImage?: string | null;
 }
 
 // ── default starter graph (prompt → generate → output) ──────────────────────
@@ -66,7 +70,7 @@ function seedGraph(add: ReturnType<typeof useGraphStore.getState>['addNode'], co
 }
 
 // ── inner component (needs ReactFlowProvider context) ───────────────────────
-const Inner: React.FC<NodeStudioProps> = ({ apiKey, params, trackCost, theme, onAsset }) => {
+const Inner: React.FC<NodeStudioProps> = ({ apiKey, params, trackCost, theme, onAsset, seedImage }) => {
   const pal = paletteFor(theme);
   const rf = useReactFlow();
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -101,6 +105,9 @@ const Inner: React.FC<NodeStudioProps> = ({ apiKey, params, trackCost, theme, on
       const st = useGraphStore.getState();
       if (st.nodes.length === 0) {
         seedGraph(st.addNode, st.onConnect);
+      }
+      if (seedImage) {
+        st.addNode('imageInput', { x: 60, y: 340 }, { source: seedImage });
       }
       window.requestAnimationFrame(() => rf.fitView({ padding: 0.2, duration: 400 }));
     }, 0);
@@ -309,7 +316,11 @@ const Inner: React.FC<NodeStudioProps> = ({ apiKey, params, trackCost, theme, on
     [theme, doRun, busy],
   );
 
-  const minimapColor = useCallback((n: GraphNode) => getSpec(n.data.type).accent, []);
+  // MiniMap fills SVG via attribute (no CSS vars) — resolve real accent colors.
+  const minimapColor = useCallback((n: GraphNode) => {
+    const acc = getAccent(useStudio.getState().accent);
+    return getSpec(n.data.type).category === 'transform' ? acc.c2 : acc.c1;
+  }, []);
 
   return (
     <NodeHostContext.Provider value={host}>
@@ -592,7 +603,7 @@ const studioCss = (pal: ReturnType<typeof paletteFor>, _theme: Theme) => `
     box-shadow: ${TOKENS.shadow};
   }
   .px-brand { display: flex; align-items: center; gap: 10px; flex: none; }
-  .px-logo { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 9px; box-shadow: 0 6px 18px rgba(168,85,247,0.4); }
+  .px-logo { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 9px; box-shadow: 0 6px 18px color-mix(in srgb, var(--violet) 40%, transparent); }
   .px-brandtxt { display: flex; flex-direction: column; line-height: 1.1; }
   .px-brandname { font-size: 13px; font-weight: 800; letter-spacing: -0.01em; }
   .px-brandsub { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; }
@@ -601,7 +612,7 @@ const studioCss = (pal: ReturnType<typeof paletteFor>, _theme: Theme) => `
     display: inline-flex; align-items: center; gap: 7px;
     padding: 9px 16px; border: none; border-radius: 10px;
     color: #fff; font-family: ${TOKENS.font}; font-size: 12.5px; font-weight: 800;
-    cursor: pointer; box-shadow: 0 8px 22px rgba(236,72,153,0.4);
+    cursor: pointer; box-shadow: 0 8px 22px color-mix(in srgb, var(--pink) 40%, transparent);
     transition: transform 0.1s ease, filter 0.14s ease, opacity 0.14s ease;
   }
   .px-run:hover:not(:disabled) { filter: brightness(1.07); }

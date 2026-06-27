@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { Download, ImageIcon, X } from 'lucide-react';
+import { Download, ImageIcon, Sparkles, X } from 'lucide-react';
 import { familyColor } from '../../lib/prodia/catalog';
 import type { ModelFamily } from '../../lib/prodia/types';
 import { useStudio } from '../../lib/studio/store';
 import type { StudioAsset } from '../../lib/studio/types';
+import RemixBar from './RemixBar';
 
 const short = (s: string, n = 80) => (s.length > n ? `${s.slice(0, n - 1)}…` : s);
 const cost = (p?: number | null) => (p || p === 0 ? `$${Number(p).toFixed(4)}` : '—');
@@ -51,8 +52,11 @@ export default function RegularSurface({ onSelect }: { onSelect: (id: string) =>
       {assets.length === 0 ? (
         <div className="empty">
           <div>
-            <div className="orb"><ImageIcon size={30} /></div>
-            <strong>Your canvas awaits</strong>
+            <div className="welcome-rings">
+              <span className="ring" /><span className="ring" /><span className="ring" />
+              <div className="core"><Sparkles size={26} /></div>
+            </div>
+            <div className="welcome-title"><span className="brand-grad">Your canvas awaits</span></div>
             <p>Pick models, write a prompt, then press <kbd>⌘ Enter</kbd> to generate.</p>
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'center', marginTop: 16, maxWidth: 420 }}>
               {examples.map((ex) => (
@@ -68,8 +72,11 @@ export default function RegularSurface({ onSelect }: { onSelect: (id: string) =>
             return (
               <article key={a.id} className="asset-card"
                 onClick={() => { onSelect(a.id); if (a.status === 'done') setBox(done.findIndex((d) => d.id === a.id)); }}>
-                <div className="asset-media"><Media asset={a} /></div>
-                {a.status === 'done' && <span className="asset-tag" style={{ background: `${hue}cc` }}>{a.family}</span>}
+                <div className="asset-media">
+                  <Media asset={a} />
+                  {a.status !== 'running' && <RemixBar asset={a} variant="overlay" />}
+                </div>
+                {a.status === 'done' && <span className="asset-tag" style={{ background: `color-mix(in srgb, ${hue} 82%, transparent)` }}>{a.family}</span>}
                 <div className="asset-foot">
                   <div className="t">{a.modelLabel}</div>
                   <div className="s">{a.status === 'done' ? cost(a.price) : a.status} · {short(a.prompt, 42)}</div>

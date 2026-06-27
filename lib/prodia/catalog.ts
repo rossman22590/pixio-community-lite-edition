@@ -12,20 +12,22 @@ const slug = (type: string) => type.replace(/[^a-z0-9]+/gi, '-').toLowerCase();
 type ModelSeed = Omit<ProdiaModel, 'id'>;
 const m = (seed: ModelSeed): ProdiaModel => ({ ...seed, id: slug(seed.type) });
 
+// Families resolve to the two accent variables so the whole UI stays on-palette
+// with whatever accent the user picks. Primary (--pink) vs secondary (--violet).
 export const FAMILY_COLORS: Record<ModelFamily, string> = {
-  FLUX: '#ff5fb7',
-  'FLUX Kontext': '#fb7185',
-  'Google AI': '#a78bfa',
-  'Stable Diffusion': '#818cf8',
-  ByteDance: '#f472b6',
-  Recraft: '#c084fc',
-  Qwen: '#22d3ee',
-  Utility: '#94a3b8',
-  'Google Veo': '#a78bfa',
-  Wan: '#c084fc',
-  Kling: '#f472b6',
-  'Sora 2': '#818cf8',
-  Pruna: '#34d399',
+  FLUX: 'var(--pink)',
+  'FLUX Kontext': 'var(--violet)',
+  'Google AI': 'var(--violet)',
+  'Stable Diffusion': 'var(--pink)',
+  ByteDance: 'var(--violet)',
+  Recraft: 'var(--pink)',
+  Qwen: 'var(--violet)',
+  Utility: 'var(--pink)',
+  'Google Veo': 'var(--violet)',
+  Wan: 'var(--pink)',
+  Kling: 'var(--violet)',
+  'Sora 2': 'var(--pink)',
+  Pruna: 'var(--violet)',
 };
 
 export interface OperationMeta {

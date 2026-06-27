@@ -116,8 +116,8 @@ export const ModelPicker: React.FC<{
           letter-spacing: 0.06em;
           text-transform: uppercase;
           color: ${TOKENS.text};
-          background: rgba(255, 95, 183, 0.18);
-          border: 1px solid rgba(255, 95, 183, 0.4);
+          background: color-mix(in srgb, var(--pink) 18%, transparent);
+          border: 1px solid color-mix(in srgb, var(--pink) 40%, transparent);
           border-radius: 6px;
           padding: 2px 5px;
           flex: 0 0 auto;
@@ -164,7 +164,7 @@ export const ModelPicker: React.FC<{
           background: rgba(255, 255, 255, 0.05);
         }
         .opt.sel {
-          background: linear-gradient(135deg, rgba(255, 95, 183, 0.16), rgba(168, 85, 247, 0.16));
+          background: linear-gradient(135deg, color-mix(in srgb, var(--pink) 16%, transparent), color-mix(in srgb, var(--violet) 16%, transparent));
         }
         .opt .dot {
           margin-top: 4px;

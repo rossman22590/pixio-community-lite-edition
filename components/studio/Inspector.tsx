@@ -3,6 +3,7 @@ import { familyColor } from '../../lib/prodia/catalog';
 import type { ModelFamily } from '../../lib/prodia/types';
 import { useStudio } from '../../lib/studio/store';
 import type { StudioAsset } from '../../lib/studio/types';
+import RemixBar from './RemixBar';
 
 const short = (s: string, n = 90) => (s.length > n ? `${s.slice(0, n - 1)}…` : s);
 const cost = (p?: number | null) => (p || p === 0 ? `$${Number(p).toFixed(4)}` : '—');
@@ -42,10 +43,8 @@ export default function Inspector({ selectedId, onSelect }: { selectedId: string
               <span className="badge">{selected.family}</span>
               <span className="badge" style={{ color: 'var(--pink-soft)' }}>{cost(selected.price)}</span>
             </div>
-            <div style={{ display: 'flex', gap: 8 }}>
-              <button className="btn sm" onClick={() => navigator.clipboard?.writeText(selected.prompt)}><Copy size={14} /> Prompt</button>
-              <button className="btn sm" onClick={() => download(selected)} disabled={!selected.url}><Download size={14} /> Save</button>
-            </div>
+            <button className="btn sm" onClick={() => navigator.clipboard?.writeText(selected.prompt)}><Copy size={14} /> Copy prompt</button>
+            {selected.status === 'done' && <RemixBar asset={selected} variant="inline" />}
           </div>
         ) : (
           <div className="empty" style={{ minHeight: 200 }}>

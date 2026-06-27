@@ -224,7 +224,7 @@ export const AIPopover: React.FC<{
         }
         .instr textarea:focus {
           border-color: ${TOKENS.pink};
-          box-shadow: 0 0 0 3px rgba(255, 78, 203, 0.16);
+          box-shadow: 0 0 0 3px color-mix(in srgb, var(--pink) 16%, transparent);
         }
         .modelrow {
           margin: 8px 0;
@@ -253,7 +253,7 @@ export const AIPopover: React.FC<{
           background: ${TOKENS.accent};
           border: 1px solid transparent;
           color: #fff;
-          box-shadow: 0 8px 20px rgba(255, 78, 203, 0.3);
+          box-shadow: 0 8px 20px color-mix(in srgb, var(--pink) 30%, transparent);
         }
         .primary:hover:not(:disabled) {
           filter: brightness(1.07);

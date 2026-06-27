@@ -54,9 +54,9 @@ export const IconButton: React.FC<{
       }
       .ib.on {
         color: ${TOKENS.text};
-        background: linear-gradient(135deg, rgba(255, 95, 183, 0.22), rgba(168, 85, 247, 0.22));
+        background: linear-gradient(135deg, color-mix(in srgb, var(--pink) 22%, transparent), color-mix(in srgb, var(--violet) 22%, transparent));
         border-color: ${TOKENS.pink};
-        box-shadow: 0 6px 18px rgba(255, 78, 203, 0.22);
+        box-shadow: 0 6px 18px color-mix(in srgb, var(--pink) 22%, transparent);
       }
       .ib.danger:hover:not(:disabled) {
         color: ${TOKENS.danger};
@@ -121,7 +121,7 @@ export const Button: React.FC<{
         background: ${TOKENS.accent};
         border-color: transparent;
         color: #fff;
-        box-shadow: 0 8px 22px rgba(255, 78, 203, 0.28);
+        box-shadow: 0 8px 22px color-mix(in srgb, var(--pink) 28%, transparent);
       }
       .btn.solid:hover:not(:disabled) {
         filter: brightness(1.06);
@@ -231,7 +231,7 @@ export const TextField: React.FC<{
         .tf:focus {
           border-color: ${TOKENS.pink};
           background: rgba(0, 0, 0, 0.4);
-          box-shadow: 0 0 0 3px rgba(255, 78, 203, 0.16);
+          box-shadow: 0 0 0 3px color-mix(in srgb, var(--pink) 16%, transparent);
         }
       `}</style>
     </>
@@ -277,7 +277,7 @@ export const Select: React.FC<{
       }
       .sl:focus {
         border-color: ${TOKENS.pink};
-        box-shadow: 0 0 0 3px rgba(255, 78, 203, 0.16);
+        box-shadow: 0 0 0 3px color-mix(in srgb, var(--pink) 16%, transparent);
       }
       .sl option {
         background: ${TOKENS.panel};
@@ -366,7 +366,7 @@ export const Slider: React.FC<{
         border-radius: 50%;
         background: #fff;
         border: 2px solid ${TOKENS.pink};
-        box-shadow: 0 2px 8px rgba(255, 78, 203, 0.4);
+        box-shadow: 0 2px 8px color-mix(in srgb, var(--pink) 40%, transparent);
         cursor: pointer;
       }
       input[type='range']::-moz-range-thumb {

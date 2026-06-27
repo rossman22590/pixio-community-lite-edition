@@ -131,7 +131,7 @@ export const GeneratePanel: React.FC<{
         }
         .prompt:focus {
           border-color: ${TOKENS.pink};
-          box-shadow: 0 0 0 3px rgba(255, 78, 203, 0.16);
+          box-shadow: 0 0 0 3px color-mix(in srgb, var(--pink) 16%, transparent);
         }
         .mp {
           margin-bottom: 12px;

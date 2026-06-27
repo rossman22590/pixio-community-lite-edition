@@ -96,9 +96,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     if (!prodiaRes.ok) {
       const errText = await prodiaRes.text();
+      // Prodia embeds the real reason as the last `state.history[].message`
+      // (or a top-level `error`/`message`). Dig it out instead of dumping the
+      // raw multipart envelope.
+      let detail = '';
+      const re = /"message":"((?:[^"\\]|\\.)*)"/g;
+      let mm: RegExpExecArray | null;
+      while ((mm = re.exec(errText))) detail = mm[1];
+      if (!detail) {
+        const top = /"error":"((?:[^"\\]|\\.)*)"/.exec(errText);
+        detail = top ? top[1] : errText.replace(/\s+/g, ' ').slice(0, 300);
+      }
+      try { detail = JSON.parse(`"${detail}"`); } catch { /* leave as-is */ }
       return res.status(prodiaRes.status).json({
-        message: `Prodia error ${prodiaRes.status}`,
-        error: errText.slice(0, 600),
+        message: `Prodia ${prodiaRes.status}: ${detail || 'job failed'}`,
+        error: detail,
       });
     }
 

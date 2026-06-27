@@ -20,6 +20,8 @@ export function useGenerate() {
   const trackCost = useStudio((s) => s.trackCost);
   const addAsset = useStudio((s) => s.addAsset);
   const updateAsset = useStudio((s) => s.updateAsset);
+  const pushPrompt = useStudio((s) => s.pushPrompt);
+  const noteModelsUsed = useStudio((s) => s.noteModelsUsed);
 
   /** Validate + launch. Returns an error string, or null if it started. */
   return useCallback((): string | null => {
@@ -30,6 +32,9 @@ export function useGenerate() {
       return 'Prompt contains prohibited content.';
     }
     if (!selectedTypes.length) return 'Select at least one model.';
+
+    pushPrompt(prompt);
+    noteModelsUsed(selectedTypes);
 
     selectedTypes.forEach((type) => {
       const model = getModel(type);
@@ -67,5 +72,5 @@ export function useGenerate() {
     });
 
     return null;
-  }, [params, selectedTypes, apiKey, trackCost, addAsset, updateAsset]);
+  }, [params, selectedTypes, apiKey, trackCost, addAsset, updateAsset, pushPrompt, noteModelsUsed]);
 }

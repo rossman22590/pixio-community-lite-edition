@@ -322,8 +322,8 @@ export const PropertiesPanel: React.FC<{
           background: rgba(255, 255, 255, 0.04);
         }
         .layer.active {
-          background: linear-gradient(135deg, rgba(255, 95, 183, 0.16), rgba(168, 85, 247, 0.16));
-          border-color: rgba(255, 95, 183, 0.4);
+          background: linear-gradient(135deg, color-mix(in srgb, var(--pink) 16%, transparent), color-mix(in srgb, var(--violet) 16%, transparent));
+          border-color: color-mix(in srgb, var(--pink) 40%, transparent);
         }
         .layer.dim {
           opacity: 0.5;
@@ -402,7 +402,7 @@ export const PropertiesPanel: React.FC<{
         }
         .segbtn.on {
           color: ${TOKENS.text};
-          background: linear-gradient(135deg, rgba(255, 95, 183, 0.2), rgba(168, 85, 247, 0.2));
+          background: linear-gradient(135deg, color-mix(in srgb, var(--pink) 20%, transparent), color-mix(in srgb, var(--violet) 20%, transparent));
           border-color: ${TOKENS.pink};
         }
       `}</style>

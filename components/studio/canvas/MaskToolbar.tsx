@@ -187,7 +187,7 @@ export const MaskToolbar: React.FC<{
         color: ${TOKENS.text};
       }
       .sb.on {
-        background: linear-gradient(135deg, rgba(255, 95, 183, 0.24), rgba(168, 85, 247, 0.24));
+        background: linear-gradient(135deg, color-mix(in srgb, var(--pink) 24%, transparent), color-mix(in srgb, var(--violet) 24%, transparent));
         color: ${TOKENS.text};
       }
       .brush {
@@ -288,7 +288,7 @@ export const MaskToolbar: React.FC<{
       }
       .prompt:focus {
         border-color: ${TOKENS.pink};
-        box-shadow: 0 0 0 3px rgba(255, 78, 203, 0.16);
+        box-shadow: 0 0 0 3px color-mix(in srgb, var(--pink) 16%, transparent);
       }
       .picker {
         width: 178px;
@@ -308,7 +308,7 @@ export const MaskToolbar: React.FC<{
         font-size: 12.5px;
         font-weight: 700;
         cursor: pointer;
-        box-shadow: 0 8px 20px rgba(255, 78, 203, 0.3);
+        box-shadow: 0 8px 20px color-mix(in srgb, var(--pink) 30%, transparent);
         transition: filter 0.15s ease, transform 0.12s ease;
       }
       .run:hover:not(:disabled) {

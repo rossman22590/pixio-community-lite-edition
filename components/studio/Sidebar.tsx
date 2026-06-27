@@ -197,14 +197,14 @@ export default function Sidebar({ onGenerate }: { onGenerate: () => void }) {
                 <div className="model-group-head">
                   <span className="dot" style={{ background: hue, boxShadow: `0 0 8px ${hue}` }} />
                   <span className="name" style={{ color: hue }}>{fam}</span>
-                  <span className="rule" style={{ background: `linear-gradient(90deg, ${FAMILY_COLORS[fam]}55, transparent)` }} />
+                  <span className="rule" style={{ background: `linear-gradient(90deg, color-mix(in srgb, ${hue} 34%, transparent), transparent)` }} />
                 </div>
                 {list.map((m) => {
                   const active = selectedTypes.includes(m.type);
                   return (
                     <button key={m.type} className={`model-card ${active ? 'active' : ''}`} onClick={() => toggleType(m.type)}>
                       <div className="info">
-                        <div className="label">{m.label}{m.badge && <span className="badge" style={{ marginLeft: 7, color: hue, borderColor: `${hue}66` }}>{m.badge}</span>}</div>
+                        <div className="label">{m.label}{m.badge && <span className="badge" style={{ marginLeft: 7, color: hue, borderColor: `color-mix(in srgb, ${hue} 42%, transparent)` }}>{m.badge}</span>}</div>
                         <div className="desc">{m.desc}</div>
                       </div>
                       <div className="check" style={active ? { borderColor: hue } : undefined}>{active && <Check size={11} />}</div>

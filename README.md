@@ -1,102 +1,130 @@
-# New UI coming soon!
+<p align="center">
+  <img src="https://pixiomedia.nyc3.digitaloceanspaces.com/uploads/1782546670680-823e0743-3ff2-4252-98d9-6f45c5bd00b8.png" alt="Pixio Studio" width="100%" />
+</p>
 
-![image](https://github.com/Tech-in-Schools-Inititaitive/pixio-community-lite-edition/assets/6137292/9a8fdaab-4a5f-49d6-b635-fc8f49848cea)
- 
+<h1 align="center">Pixio Studio</h1>
 
-# Pixio Community Lite Edition
+<p align="center">
+  <strong>The open-source AI media studio.</strong><br/>
+  Generate, edit, and orchestrate images & video across three connected surfaces —
+  a fast <em>Studio</em>, a Canva-style <em>AI Canvas</em>, and a ComfyUI-style <em>Node graph</em> —
+  all powered by your own <a href="https://prodia.com">Prodia</a> key.
+</p>
 
-Pixio Community Lite Edition is a web application that generates stable images based on user prompts using various AI models. It provides an interface for users to enter a prompt, select models, and generate images. Users can also send the generated images to a Discord channel. 
+<p align="center">
+  <img alt="Next.js" src="https://img.shields.io/badge/Next.js-13-black?logo=next.js" />
+  <img alt="React" src="https://img.shields.io/badge/React-18-149eca?logo=react" />
+  <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-5-3178c6?logo=typescript" />
+  <img alt="Prodia" src="https://img.shields.io/badge/Prodia-v2%20API-ff4ecb" />
+  <img alt="License" src="https://img.shields.io/badge/license-MIT-8b5cf6" />
+</p>
 
-## Technologies Used
+---
 
-- React: A JavaScript library for building user interfaces.
-- Axios: A popular library for making HTTP requests.
-- react-image-lightbox: A React component for displaying images in a lightbox.
-- Material-UI: A popular React UI framework that provides pre-built components.
-- discord.js: A powerful JavaScript library for interacting with the Discord API.
-- Prodia: An AI model API for image generation.
-- OpenAI: A leading provider of AI models and APIs.
-- Upstash: A serverless Redis database for caching and data storage.
-- Vercel: A cloud platform for deploying and hosting web applications.
-- Next.js: A React framework for building server-rendered and statically exported applications.
-- Tailwind CSS: A utility-first CSS framework for building responsive designs.
+## ✨ Three surfaces, one creative flow
 
-## Demo
+| | Surface | What it's for |
+|---|---|---|
+| ⚡ | **Studio** | The fast lane. Fire any image/video models in parallel, compare outputs side-by-side, iterate at speed. |
+| 🎨 | **Canvas** | An infinite Canva-style board. Drop or generate images, then **click any image to edit it with AI** — instruction edits, inpaint, remove-bg, upscale, variations. |
+| 🕸️ | **Nodes** | A visual workflow graph. Wire **Prompt → Generate → Edit → Output**, chain an image into an edit model, run the whole pipeline. |
 
-To see a live demo of Pixio Community Lite Edition, you can visit the following link: [Demo](https://Pixio Community Lite Edition-community-lite.vercel.app/)
+Everything **flows between them**: generate in Studio → *Send to Canvas* to edit → drop the result into a *Node* pipeline. Your gallery is shared across all three and **persists across reloads** (IndexedDB).
 
-## Getting Started
+---
 
-To get a local copy of Pixio Community Lite Edition up and running, follow these steps:
+## 🚀 Highlights
 
-1. Clone the repository
-2. Navigate to the project directory
-3. Install the dependencies: `npm install`
-4. Start the development server: `npm start`
-5. Open your web browser and visit: `http://localhost:3000`
+- **🔁 Universal remix bar** — on every output: Vary · Edit · Upscale · Remove BG · Animate → video · Send to Canvas/Nodes · Compare · Download.
+- **🖌️ Click-to-edit canvas** — select an image, type an instruction, pick an edit model (FLUX Kontext, Qwen Image-Edit, Seedream) and apply — or mask-brush to inpaint.
+- **🧩 Real node engine** — typed, color-coded ports, connection validation, drag-to-empty quick-add, save/load/export graphs, topological execution with live per-node status + cost.
+- **⌘ Command palette** — `⌘K` to jump anywhere, run anything, pick any of 45 models, or paste a recent prompt.
+- **⏳ Alive waiting** — a queue dock with live timers and a completion chime; keep creating while jobs run.
+- **🆚 Compare view** — tag outputs and A/B them with a draggable before/after slider, or grid up to four.
+- **🎨 20 accent themes + light/dark** — a Settings menu recolors the *entire* app live; your two chosen colors take over everywhere.
+- **💸 Exact cost tracking** — per-job Prodia pricing via `?price=true`.
+- **🔐 Bring-your-own-key** — your Prodia key lives only in your browser.
+- **⌨️ Keyboard-first**, drag-and-drop image import, prompt + model memory, `prefers-reduced-motion` aware.
 
-## Usage
+---
 
-Macro crisp quality, head, solo focus, sharp focus, complex 3d render ultra-detailed, an extremely delicate and beautiful girl, ((half body portrait:1.1)), looking at viewer, 18 yo, blonde with a bun, emerald green eyes, (silver plate mail that has gold outlines:1.3), real soft lustrous human skin, perfect skin, vibrant details, hyper realistic, beautiful background (medieval castle interior:1.2), octane render, 8k, best quality, masterpiece, extremely detailed, CG ,unity, wallpaper, (realistic, photo-realistic:1.37), Amazing, finely detail, physically-based rendering, masterpiece, best quality, official art, extremely detailed CG unity 8k wallpaper,
+## 🤖 Powered by Prodia
 
+Pixio talks to the **Prodia v2 inference API** (`POST https://inference.prodia.com/v2/job`). Image-input jobs are sent as `multipart/form-data` (a `job` part + binary `input` parts), so editing and chaining work end-to-end.
 
-Prompt 1: epic realistic,bright sunny day, daylight on mars, mars, outside,bright sky, (((sexy spacesuit, havey boots, sexy woman, see-through helmet, straps, belts, black jeans, full body, zoomed out, detailed costume, utility belt))) long slender legs 80mm, sexy woman wearing an astronaut helmet. (((winona ryder,sci-fi, science fiction, spacex fashion, beautiful face))) ((pretty face)),mars background daylight, (((full body, athletic body, action pose, sexy detailed spacesuit, slender long legs))) dusty atmosphere, fog john singer sarget, blue pallette, mars background, (hyperrealism, soft light, sharp:1.2), soft light, sharp, (cinematic, teal and orange:0.85), (muted colors, dim colors, soothing tones:1.3), low saturation, (hyperdetailed:1.2), (intricate details:1.12), hdr, (intricate details, hyperdetailed:1.15), faded, (neutral colors:1.2), art, (hdr:1.5), (muted colors:1.1), (pastel:0.2), hyperdetailed, (artstation:1.4), warm lights, dramatic light, (intricate details:1.2), vignette, natural background, rutkowski
+**Operations:** `txt2img` · `img2img` · instruction `edit` · `inpaint` · `upscale` · `remove-background` · `txt2vid` · `img2vid`
 
-bad face, no identical eyes, bad hands, bad drawed mouth, bad detailed eyes, bad mouth,bad quality, deformities, lowres, polar lowres, bad anatomy, bad face, bad hands, bad body, bad feet, bad proportions, {bad leg}, {more legs}, worst quality, low quality, normal quality, gross proportions, blurry, poorly drawn, text,error, missing fingers, missing arms, missing legs, short legs, extra digit, indoors, out of frame, [petite], low background, distorted perspective, canvas frame, cartoon, 3d, ((disfigured)), ((bad art)), ((deformed)),((extra limbs)),((close up)),((b&w)), wierd colors, blurry, (((duplicate))), ((morbid)), ((mutilated)), [out of frame], extra fingers, mutated hands, ((poorly drawn hands)), ((poorly drawn face)), (((mutation))), (((deformed))), ((ugly)), blurry, ((bad anatomy)), (((bad proportions))), ((extra limbs)), cloned face, (((disfigured))), out of frame, ugly, extra limbs, (bad anatomy), gross proportions, (malformed limbs), ((missing arms)), ((missing legs)), (((extra arms))), (((extra legs))), mutated hands, (fused fingers), (too many fingers), (((long neck))), Photoshop, video game, ugly, tiling, poorly drawn hands, poorly drawn feet, poorly drawn face, out of frame, mutation, mutated, extra limbs, extra legs, extra arms, disfigured, deformed, cross-eye, body out of frame, blurry, bad art, bad anatomy, 3d render, canvas frame, cartoon, 3d, ((disfigured)), ((bad art)), ((deformed)),((extra limbs)),((close up)),((b&w)), wierd colors, blurry, (((duplicate))), ((morbid)), ((mutilated)), [out of frame], extra fingers, mutated hands, ((poorly drawn hands)), ((poorly drawn face)), (((mutation))), (((deformed))), ((ugly)), blurry, ((bad anatomy)), (((bad proportions))), ((extra limbs)), cloned face, (((disfigured))), out of frame, ugly, extra limbs, (bad anatomy), gross proportions, (malformed limbs), ((missing arms)), ((missing legs)), (((extra arms))), (((extra legs))), mutated hands, (fused fingers), (too many fingers), (((long neck))), ugly
+**Model families:** FLUX & FLUX 2 · FLUX Kontext · Google Gemini / Nano Banana · Stable Diffusion (SDXL / SD1.5) · ByteDance Seedream · Recraft · Qwen Image-Edit · Google Veo · Wan · Kling · Sora 2 · Pruna · HYPIR upscaler
 
-cfg is 7 
-Karras sampler
-steps 13
+---
 
-1. Enter a prompt in the "Prompt" input field.
-2. Enter a negative prompt in the "Negative Prompt" input field.
-3. Select one or more AI models from the available options.
-4. Click the "Generate Image" button to generate images based on the selected models.
-5. Optionally, click on generated images to open them in a lightbox.
-6. Select the images you want to send to Discord by checking the corresponding checkboxes.
-7. Click the "Send to Gallery" button to send the selected images to Discord.
+## 🏁 Quick start
 
-## Prompt Moderation
+```bash
+git clone https://github.com/rossman22590/pixio-community-lite-edition.git
+cd pixio-community-lite-edition
+npm install
+cp .env.example .env   # optional — the app also takes your key in the UI
+npm run dev            # → http://localhost:3000
+```
 
-Pixio Community Lite Edition performs prompt moderation to ensure that the entered prompts do not contain inappropriate content. It checks for prohibited words such as "nude," "naked," and "pussy." If a prompt contains any of these prohibited words, the generation process will be canceled, and an error message will be displayed.
+Open the app, paste your free **Prodia API key** (grab one at [app.prodia.com](https://app.prodia.com)), and start creating.
 
-## Models
+---
 
-Pixio Community Lite Edition supports the following AI models for image generation:
+## 🔑 Environment
 
-- Analog Diffusion v1.0
-- Anything v3.0
-- Anything v4.5
-- Anything V5
-- Orange Mix AOM3A3
-- Deliberate v2
-- Dreamlike Diffusion 1.0
-- Dreamlike Diffusion 2.0
-- Dreamshaper 5 BakedVae
-- Dreamshaper 6 BakedVae
-- Elddreths Vivid Mix
-- Lyriel v15
-- Meinamix MeinaV9
-- Openjourney V4
-- Portrait+ 1.0
-- Realistic Vision V2.0
-- Rev Animated v122
-- Riffusion Model v1
-- SDV1 4
-- Pruned Emaonly v1-5
-- Shonins Beautiful v10
-- Theallys Mix II Churned
-- Timeless 1.0
+All optional — the app is fully usable with just an in-browser key.
 
-Feel free to add more models to the `modelMap` object in the code.
+| Variable | Purpose |
+|---|---|
+| `PRODIA_KEY` | Server-side fallback key (used only when a request has none). |
+| `OPENAI_API_KEY` | Enables AI **prompt remix** + **image → prompt**. Falls back to strong local heuristics if absent. |
+| `OPENAI_MODEL` / `OPENAI_VISION_MODEL` | Override the model used for the AI helpers. |
 
-## Deployment
+---
 
-To deploy Pixio Community Lite Edition to a production environment, follow these steps:
+## ⌨️ Keyboard shortcuts
 
-1. Build the production-ready code: `npm run build`
-2. Deploy the generated `build` folder to Vercel or your preferred hosting service.
+| Key | Action |
+|---|---|
+| `⌘K` | Command palette |
+| `⌘↵` | Generate |
+| `?` | Shortcuts cheat-sheet |
+| `⌘\` | Toggle theme |
+| `G` / `C` / `N` | Studio / Canvas / Nodes |
+| `Esc` | Close overlays |
 
-## Contributing
+---
 
-Contributions are welcome! If you have any ideas, suggestions, or bug reports
+## 🧱 Architecture
+
+```
+lib/
+  prodia/      catalog · config builder · client · types   (operation-aware model registry)
+  graph/       registry · zustand store · execution engine (the node system)
+  canvas/      element model · geometry · mask · image hook
+  studio/      global store (+ IndexedDB) · theme/accents · useGenerate · useRemix
+components/studio/
+  Sidebar · RegularSurface · Inspector · RemixBar · CommandPalette ·
+  QueueDock · CompareView · SettingsMenu · ApiKeyModal
+  nodes/       NodeStudio · NodeTypes · shared        (React Flow)
+  canvas/      CanvasStudio · AIPopover · MaskToolbar · PropertiesPanel · …  (Konva)
+pages/
+  index.tsx    thin orchestrator (shell + 3 surfaces)
+  api/         job (unified, multipart) · assist · vision
+```
+
+---
+
+## 🧰 Tech stack
+
+**Next.js 13** (Pages Router) · **React 18** · **TypeScript** · **Zustand** · **@xyflow/react** (React Flow) · **Konva / react-konva** · **lucide-react** · CSS-variable design system (Inter + Space Grotesk).
+
+---
+
+## 📄 License
+
+MIT — see [LICENSE](./LICENSE). Build something amazing.
+
+<p align="center"><sub>Made with 💜 by the Pixio community · try the full platform at <a href="https://beta.pixio.myapps.ai">beta.pixio.myapps.ai</a></sub></p>

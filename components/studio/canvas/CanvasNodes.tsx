@@ -20,6 +20,7 @@ interface NodeProps {
   onChange: (patch: Partial<CanvasElement>) => void;
   registerRef: (id: string, node: Konva.Node | null) => void;
   onDblClick?: () => void;
+  accentColor?: string;
 }
 
 /* Shared drag/transform commit handlers ----------------------------------- */
@@ -34,7 +35,7 @@ const ImageNode: React.FC<NodeProps & {
   el: ImageElement;
   maskMode: boolean;
   maskStrokes: MaskStroke[];
-}> = ({ el, selected, draggable, onSelect, onChange, registerRef, maskMode, maskStrokes }) => {
+}> = ({ el, selected, draggable, onSelect, onChange, registerRef, maskMode, maskStrokes, accentColor = '#ff4ecb' }) => {
   const [image, status] = useCanvasImage(el.src);
 
   return (
@@ -86,7 +87,7 @@ const ImageNode: React.FC<NodeProps & {
             <Line
               key={i}
               points={s.points}
-              stroke={s.paint ? 'rgba(255,95,183,0.85)' : 'rgba(0,0,0,1)'}
+              stroke={s.paint ? accentColor : 'rgba(0,0,0,1)'}
               strokeWidth={s.size}
               lineCap="round"
               lineJoin="round"
@@ -99,7 +100,7 @@ const ImageNode: React.FC<NodeProps & {
       )}
 
       {/* loading veil during AI op */}
-      {el.loading && <LoadingVeil width={el.width} height={el.height} radius={el.cornerRadius} label={el.loadingLabel} />}
+      {el.loading && <LoadingVeil width={el.width} height={el.height} radius={el.cornerRadius} label={el.loadingLabel} accentColor={accentColor} />}
     </Group>
   );
 };
@@ -224,11 +225,12 @@ const ShapeNode: React.FC<NodeProps & { el: ShapeElement }> = ({
 };
 
 /* ── Loading veil drawn over an image while an AI op runs ─────────────────── */
-const LoadingVeil: React.FC<{ width: number; height: number; radius: number; label?: string }> = ({
+const LoadingVeil: React.FC<{ width: number; height: number; radius: number; label?: string; accentColor?: string }> = ({
   width,
   height,
   radius,
   label,
+  accentColor = '#ff4ecb',
 }) => {
   const cx = width / 2;
   const cy = height / 2;
@@ -236,7 +238,7 @@ const LoadingVeil: React.FC<{ width: number; height: number; radius: number; lab
   return (
     <Group listening={false}>
       <Rect width={width} height={height} cornerRadius={radius} fill="rgba(18,7,22,0.62)" />
-      <SpinnerArc x={cx} y={cy} radius={r} />
+      <SpinnerArc x={cx} y={cy} radius={r} accentColor={accentColor} />
       {label && (
         <KText
           text={label}
@@ -257,7 +259,7 @@ const LoadingVeil: React.FC<{ width: number; height: number; radius: number; lab
 /** A rotating arc used as a Konva spinner. Animated by Stage's batchDraw loop
  *  via the `rotation` ticking from the parent — but to be self-contained we use
  *  a Konva animation in an effect. */
-const SpinnerArc: React.FC<{ x: number; y: number; radius: number }> = ({ x, y, radius }) => {
+const SpinnerArc: React.FC<{ x: number; y: number; radius: number; accentColor?: string }> = ({ x, y, radius, accentColor = '#ff4ecb' }) => {
   const ref = React.useRef<Konva.Circle>(null);
   React.useEffect(() => {
     const node = ref.current;
@@ -279,11 +281,11 @@ const SpinnerArc: React.FC<{ x: number; y: number; radius: number }> = ({ x, y, 
       x={x}
       y={y}
       radius={radius}
-      stroke="#ff5fb7"
+      stroke={accentColor}
       strokeWidth={Math.max(3, radius * 0.18)}
       dash={[radius * 2.0, radius * 1.4]}
       lineCap="round"
-      shadowColor="#ff4ecb"
+      shadowColor={accentColor}
       shadowBlur={16}
     />
   );
