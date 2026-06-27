@@ -147,7 +147,7 @@ export default function Sidebar({ onGenerate }: { onGenerate: () => void }) {
             <div className="field">
               <label>Duration</label>
               <div className="slider-row">
-                <input type="range" min={4} max={8} value={params.duration} onChange={(e) => patchParams({ duration: +e.target.value })} />
+                <input type="range" min={4} max={8} step={2} value={params.duration} onChange={(e) => patchParams({ duration: +e.target.value })} />
                 <span className="val">{params.duration}s</span>
               </div>
             </div>

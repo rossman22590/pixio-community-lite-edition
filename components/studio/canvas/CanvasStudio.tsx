@@ -116,7 +116,7 @@ const CanvasStudio: React.FC<CanvasStudioProps> = ({
   accentColor = '#ff4ecb',
 }) => {
   // Konva (canvas 2D) cannot resolve CSS vars — compute real colors here.
-  const gridStroke = theme === 'light' ? 'rgba(120,50,140,0.12)' : 'rgba(255,214,242,0.10)';
+  const gridStroke = theme === 'light' ? 'rgba(60,60,72,0.10)' : 'rgba(255,255,255,0.07)';
   /* ── refs ──────────────────────────────────────────────────────────────── */
   const containerRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<Konva.Stage>(null);

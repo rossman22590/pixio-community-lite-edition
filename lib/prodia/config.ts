@@ -100,13 +100,19 @@ export function buildConfig(
 
     case 'txt2vid':
     case 'img2vid': {
+      // img2vid models still require a prompt — supply a sensible motion default.
+      if (model.operation === 'img2vid' && !config.prompt) {
+        config.prompt = 'subtle, natural cinematic motion';
+      }
       if (t('veo')) {
-        config.resolution = params.resolution;
-        config.aspect_ratio = params.aspectRatio;
-        config.duration_seconds = params.duration;
+        // Veo only accepts a strict subset: 16:9 | 9:16, duration 4 | 6 | 8.
+        config.resolution = params.resolution === '1080p' ? '1080p' : '720p';
+        config.aspect_ratio = params.aspectRatio === '9:16' ? '9:16' : '16:9';
+        const d = params.duration;
+        config.duration_seconds = d <= 4 ? 4 : d <= 6 ? 6 : 8;
         if (t('v2')) config.generate_audio = params.generateAudio;
       } else if (t('seedance') || t('kling') || t('sora')) {
-        config.aspect_ratio = params.aspectRatio;
+        config.aspect_ratio = params.aspectRatio === '9:16' ? '9:16' : '16:9';
       }
       break;
     }

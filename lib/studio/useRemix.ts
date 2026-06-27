@@ -57,7 +57,7 @@ export function useRemix() {
 
   const upscale = useCallback((a: StudioAsset) => { if (a.url && !a.isVideo && UPSCALE) run(UPSCALE, { inputs: [a.url] }); }, [run]);
   const removeBg = useCallback((a: StudioAsset) => { if (a.url && !a.isVideo && REMOVEBG) run(REMOVEBG, { inputs: [a.url] }); }, [run]);
-  const animate = useCallback((a: StudioAsset) => { if (a.url && !a.isVideo && ANIMATE) run(ANIMATE, { inputs: [a.url], prompt: a.prompt }); }, [run]);
+  const animate = useCallback((a: StudioAsset) => { if (a.url && !a.isVideo && ANIMATE) run(ANIMATE, { inputs: [a.url], prompt: a.prompt || 'subtle, natural cinematic motion' }); }, [run]);
 
   const toCanvas = useCallback((a: StudioAsset) => { if (a.url) sendToCanvas({ url: a.url, isVideo: a.isVideo }); }, [sendToCanvas]);
   const toNodes = useCallback((a: StudioAsset) => { if (a.url && !a.isVideo) sendToNodes(a.url); }, [sendToNodes]);

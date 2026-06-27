@@ -61,8 +61,8 @@ const ImageNode: React.FC<NodeProps & {
           width={el.width}
           height={el.height}
           cornerRadius={el.cornerRadius}
-          fill="rgba(40,16,47,0.85)"
-          stroke="rgba(255,214,242,0.18)"
+          fill="rgba(22,22,28,0.85)"
+          stroke="rgba(255,255,255,0.14)"
           strokeWidth={1}
         />
       )}
@@ -82,7 +82,7 @@ const ImageNode: React.FC<NodeProps & {
       {/* mask strokes overlay (only the element being masked) */}
       {maskMode && (
         <Group clipFunc={(ctx) => clipRoundRect(ctx, el.width, el.height, el.cornerRadius)}>
-          <Rect width={el.width} height={el.height} fill="rgba(18,7,22,0.45)" />
+          <Rect width={el.width} height={el.height} fill="rgba(12,12,16,0.5)" />
           {maskStrokes.map((s, i) => (
             <Line
               key={i}
@@ -237,7 +237,7 @@ const LoadingVeil: React.FC<{ width: number; height: number; radius: number; lab
   const r = Math.max(10, Math.min(width, height) * 0.12);
   return (
     <Group listening={false}>
-      <Rect width={width} height={height} cornerRadius={radius} fill="rgba(18,7,22,0.62)" />
+      <Rect width={width} height={height} cornerRadius={radius} fill="rgba(12,12,16,0.66)" />
       <SpinnerArc x={cx} y={cy} radius={r} accentColor={accentColor} />
       {label && (
         <KText
