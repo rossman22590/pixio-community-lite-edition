@@ -1,0 +1,293 @@
+// ──────────────────────────────────────────────────────────────────────────
+// Pixio · Node graph registry
+// The single source of truth for what node types exist, their typed handle
+// ports, their default model, and the rules that govern which connections are
+// legal. Both the store (validation), the engine (execution) and the UI
+// (rendering) read from here.
+// ──────────────────────────────────────────────────────────────────────────
+
+import type { Connection, Edge } from '@xyflow/react';
+import {
+  IMG2VID_MODELS,
+  INPAINT_MODELS,
+  TXT2IMG_MODELS,
+  TXT2VID_MODELS,
+  UTILITY_MODELS,
+  editModels,
+  getModel,
+} from '../prodia/catalog';
+import type { Operation, ProdiaModel } from '../prodia/types';
+
+// ── Data types that flow along edges ────────────────────────────────────────
+export type DataType = 'text' | 'image' | 'video' | 'number';
+
+/** A coloured, typed handle on a node. */
+export interface HandlePort {
+  /** Stable handle id, unique within the node (used as the RF handle id). */
+  id: string;
+  dataType: DataType;
+  label: string;
+}
+
+export type NodeCategory = 'input' | 'generate' | 'transform' | 'output';
+
+/** Every node type registered in the editor. */
+export type NodeType =
+  | 'prompt'
+  | 'imageInput'
+  | 'generate'
+  | 'edit'
+  | 'inpaint'
+  | 'upscale'
+  | 'removebg'
+  | 'animate'
+  | 'output';
+
+export interface NodeSpec {
+  type: NodeType;
+  title: string;
+  subtitle: string;
+  /** The Prodia operation this node maps to (input/output nodes have none). */
+  operation?: Operation;
+  category: NodeCategory;
+  inputs: HandlePort[];
+  outputs: HandlePort[];
+  accent: string;
+  /** The pool of models this node can choose from (empty for source/sink). */
+  models: ProdiaModel[];
+  /** Default model id for a freshly-created node. */
+  defaultModel?: string;
+}
+
+// ── Colour per data type — handles + edges are colour-coded by what flows ────
+export const DATA_TYPE_COLORS: Record<DataType, string> = {
+  text: '#ff8fcf', // pinkSoft — language
+  image: '#a855f7', // violet — pixels
+  video: '#22d3ee', // cyan — motion
+  number: '#34d399', // mint — scalars
+};
+
+export const DATA_TYPE_LABELS: Record<DataType, string> = {
+  text: 'Text',
+  image: 'Image',
+  video: 'Video',
+  number: 'Number',
+};
+
+const first = (list: ProdiaModel[]): string | undefined => list[0]?.id;
+
+// ── The registry ────────────────────────────────────────────────────────────
+export const NODE_SPECS: Record<NodeType, NodeSpec> = {
+  prompt: {
+    type: 'prompt',
+    title: 'Prompt',
+    subtitle: 'Text source',
+    category: 'input',
+    inputs: [],
+    outputs: [{ id: 'text', dataType: 'text', label: 'Prompt' }],
+    accent: '#ff8fcf',
+    models: [],
+  },
+
+  imageInput: {
+    type: 'imageInput',
+    title: 'Image',
+    subtitle: 'Upload or URL',
+    category: 'input',
+    inputs: [],
+    outputs: [{ id: 'image', dataType: 'image', label: 'Image' }],
+    accent: '#a855f7',
+    models: [],
+  },
+
+  generate: {
+    type: 'generate',
+    title: 'Generate',
+    subtitle: 'Text → image / video',
+    operation: 'txt2img',
+    category: 'generate',
+    inputs: [{ id: 'prompt', dataType: 'text', label: 'Prompt' }],
+    // Output medium follows the chosen model (resolved at render/exec time);
+    // we expose both an image and a video out so either model class connects.
+    outputs: [
+      { id: 'image', dataType: 'image', label: 'Image' },
+      { id: 'video', dataType: 'video', label: 'Video' },
+    ],
+    accent: '#ff5fb7',
+    models: [...TXT2IMG_MODELS, ...TXT2VID_MODELS],
+    defaultModel: first(TXT2IMG_MODELS),
+  },
+
+  edit: {
+    type: 'edit',
+    title: 'Edit',
+    subtitle: 'Instruction edit',
+    operation: 'edit',
+    category: 'transform',
+    inputs: [
+      { id: 'image', dataType: 'image', label: 'Image' },
+      { id: 'prompt', dataType: 'text', label: 'Instruction' },
+    ],
+    outputs: [{ id: 'image', dataType: 'image', label: 'Image' }],
+    accent: '#22d3ee',
+    models: editModels(),
+    defaultModel: first(editModels()),
+  },
+
+  inpaint: {
+    type: 'inpaint',
+    title: 'Inpaint',
+    subtitle: 'Masked repaint',
+    operation: 'inpaint',
+    category: 'transform',
+    inputs: [
+      { id: 'image', dataType: 'image', label: 'Image' },
+      { id: 'mask', dataType: 'image', label: 'Mask' },
+      { id: 'prompt', dataType: 'text', label: 'Prompt' },
+    ],
+    outputs: [{ id: 'image', dataType: 'image', label: 'Image' }],
+    accent: '#a78bfa',
+    models: INPAINT_MODELS,
+    defaultModel: first(INPAINT_MODELS),
+  },
+
+  upscale: {
+    type: 'upscale',
+    title: 'Upscale',
+    subtitle: 'Super-resolution',
+    operation: 'upscale',
+    category: 'transform',
+    inputs: [{ id: 'image', dataType: 'image', label: 'Image' }],
+    outputs: [{ id: 'image', dataType: 'image', label: 'Image' }],
+    accent: '#94a3b8',
+    models: UTILITY_MODELS.filter((model) => model.operation === 'upscale'),
+    defaultModel: first(UTILITY_MODELS.filter((model) => model.operation === 'upscale')),
+  },
+
+  removebg: {
+    type: 'removebg',
+    title: 'Remove BG',
+    subtitle: 'Subject cutout',
+    operation: 'removebg',
+    category: 'transform',
+    inputs: [{ id: 'image', dataType: 'image', label: 'Image' }],
+    outputs: [{ id: 'image', dataType: 'image', label: 'Cutout' }],
+    accent: '#34d399',
+    models: UTILITY_MODELS.filter((model) => model.operation === 'removebg'),
+    defaultModel: first(UTILITY_MODELS.filter((model) => model.operation === 'removebg')),
+  },
+
+  animate: {
+    type: 'animate',
+    title: 'Animate',
+    subtitle: 'Image → video',
+    operation: 'img2vid',
+    category: 'transform',
+    inputs: [
+      { id: 'image', dataType: 'image', label: 'Image' },
+      { id: 'prompt', dataType: 'text', label: 'Motion' },
+    ],
+    outputs: [{ id: 'video', dataType: 'video', label: 'Video' }],
+    accent: '#a78bfa',
+    models: IMG2VID_MODELS,
+    defaultModel: first(IMG2VID_MODELS),
+  },
+
+  output: {
+    type: 'output',
+    title: 'Output',
+    subtitle: 'Preview & download',
+    category: 'output',
+    inputs: [
+      { id: 'image', dataType: 'image', label: 'Image' },
+      { id: 'video', dataType: 'video', label: 'Video' },
+    ],
+    outputs: [],
+    accent: '#ff4ecb',
+    models: [],
+  },
+};
+
+export const ALL_NODE_TYPES: NodeType[] = Object.keys(NODE_SPECS) as NodeType[];
+
+export const getSpec = (type: NodeType): NodeSpec => NODE_SPECS[type];
+
+export const isNodeType = (value: string): value is NodeType =>
+  Object.prototype.hasOwnProperty.call(NODE_SPECS, value);
+
+// ── Palette grouping for the "Add node" panel ───────────────────────────────
+export interface PaletteGroup {
+  category: NodeCategory;
+  label: string;
+  types: NodeType[];
+}
+
+export const PALETTE_GROUPS: PaletteGroup[] = [
+  { category: 'input', label: 'Inputs', types: ['prompt', 'imageInput'] },
+  { category: 'generate', label: 'Generate', types: ['generate'] },
+  {
+    category: 'transform',
+    label: 'Transform',
+    types: ['edit', 'inpaint', 'upscale', 'removebg', 'animate'],
+  },
+  { category: 'output', label: 'Output', types: ['output'] },
+];
+
+// ── Handle lookups ──────────────────────────────────────────────────────────
+export const findOutput = (type: NodeType, handleId?: string | null): HandlePort | undefined => {
+  const outs = NODE_SPECS[type].outputs;
+  if (!handleId) return outs[0];
+  return outs.find((port) => port.id === handleId);
+};
+
+export const findInput = (type: NodeType, handleId?: string | null): HandlePort | undefined => {
+  const ins = NODE_SPECS[type].inputs;
+  if (!handleId) return ins[0];
+  return ins.find((port) => port.id === handleId);
+};
+
+/**
+ * The data type that a node's chosen model actually produces. For a `generate`
+ * node this depends on whether a video or image model is selected, so we
+ * resolve it from the model rather than the static spec.
+ */
+export const resolveOutputDataType = (type: NodeType, modelId?: string): DataType => {
+  if (type === 'generate' && modelId) {
+    const model = getModel(modelId);
+    if (model) return model.medium === 'video' ? 'video' : 'image';
+  }
+  const spec = NODE_SPECS[type];
+  return spec.outputs[0]?.dataType ?? 'image';
+};
+
+// ── Connection validation ───────────────────────────────────────────────────
+/**
+ * A connection is valid only when the source output's data type matches the
+ * target input's data type (text→text, image→image, …). We also reject self
+ * loops. This is the rule the store + <ReactFlow isValidConnection> both use.
+ */
+export function isValidConnection(
+  conn: Connection | Edge,
+  nodeTypeOf: (id: string) => NodeType | undefined,
+  modelIdOf: (id: string) => string | undefined,
+): boolean {
+  const { source, target, sourceHandle, targetHandle } = conn as Connection;
+  if (!source || !target) return false;
+  if (source === target) return false;
+
+  const sourceType = nodeTypeOf(source);
+  const targetType = nodeTypeOf(target);
+  if (!sourceType || !targetType) return false;
+
+  const out = findOutput(sourceType, sourceHandle);
+  const inp = findInput(targetType, targetHandle);
+  if (!out || !inp) return false;
+
+  // For generate nodes the live output type depends on the chosen model.
+  const sourceDataType =
+    sourceType === 'generate'
+      ? resolveOutputDataType('generate', modelIdOf(source))
+      : out.dataType;
+
+  return sourceDataType === inp.dataType;
+}
