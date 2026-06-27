@@ -59,36 +59,38 @@ export function accentVars(a: Accent, theme: 'dark' | 'light' = 'dark'): Record<
   const base =
     theme === 'dark'
       ? {
+          // Surfaces are tinted with the PRIMARY color only, so the whole app
+          // reads as shades of the chosen color. c2 is reserved for accent pops.
           '--bg': mixCss(a.c1, 7, '#080b0b'),
-          '--bg-deep': mixCss(a.c2, 5, '#040606'),
+          '--bg-deep': mixCss(a.c1, 5, '#040606'),
           '--panel': mixCss(a.c1, 9, 'rgba(14,16,18,0.68)'),
           '--panel-solid': mixCss(a.c1, 9, '#15181b'),
-          '--panel-2': mixCss(a.c2, 10, 'rgba(18,20,23,0.74)'),
-          '--elevated': mixCss(a.c2, 12, '#1a1d22'),
+          '--panel-2': mixCss(a.c1, 11, 'rgba(18,20,23,0.74)'),
+          '--elevated': mixCss(a.c1, 13, '#1a1d22'),
           '--line': mixCss(a.c1, 15, 'transparent'),
           '--ghost': mixCss(a.c1, 9, 'transparent'),
-          '--topbar-bg': `linear-gradient(180deg, ${mixCss(a.c1, 14, 'rgba(8,10,12,0.88)')}, ${mixCss(a.c2, 10, 'rgba(8,10,12,0.58)')})`,
+          '--topbar-bg': `linear-gradient(180deg, ${mixCss(a.c1, 14, 'rgba(8,10,12,0.88)')}, ${mixCss(a.c1, 9, 'rgba(8,10,12,0.58)')})`,
           '--scrim': mixCss(a.c1, 10, 'rgba(0,0,0,0.82)'),
           '--skeleton-a': mixCss(a.c1, 10, 'transparent'),
-          '--skeleton-b': mixCss(a.c2, 24, 'transparent'),
-          '--glow': `0 0 0 1px ${rgba(a.c1, 0.18)}, 0 18px 50px ${rgba(a.c2, 0.18)}`,
+          '--skeleton-b': mixCss(a.c1, 24, 'transparent'),
+          '--glow': `0 0 0 1px ${rgba(a.c1, 0.18)}, 0 18px 50px ${rgba(a.c1, 0.16)}`,
           '--shadow': `0 2px 4px rgba(0,0,0,0.22), 0 14px 32px ${rgba(a.c1, 0.12)}, 0 30px 70px rgba(0,0,0,0.34)`,
         }
       : {
           '--bg': mixCss(a.c1, 6, '#ffffff'),
-          '--bg-deep': mixCss(a.c2, 9, '#f7fafb'),
+          '--bg-deep': mixCss(a.c1, 9, '#f7fafb'),
           '--panel': mixCss(a.c1, 6, 'rgba(255,255,255,0.84)'),
           '--panel-solid': mixCss(a.c1, 4, '#ffffff'),
-          '--panel-2': mixCss(a.c2, 5, 'rgba(255,255,255,0.92)'),
-          '--elevated': mixCss(a.c2, 4, '#ffffff'),
+          '--panel-2': mixCss(a.c1, 5, 'rgba(255,255,255,0.92)'),
+          '--elevated': mixCss(a.c1, 4, '#ffffff'),
           '--line': mixCss(a.c1, 22, 'transparent'),
           '--ghost': mixCss(a.c1, 9, 'transparent'),
-          '--topbar-bg': `linear-gradient(180deg, ${mixCss(a.c1, 10, 'rgba(255,255,255,0.9)')}, ${mixCss(a.c2, 7, 'rgba(255,255,255,0.56)')})`,
-          '--scrim': mixCss(a.c2, 13, 'rgba(255,255,255,0.80)'),
+          '--topbar-bg': `linear-gradient(180deg, ${mixCss(a.c1, 10, 'rgba(255,255,255,0.9)')}, ${mixCss(a.c1, 7, 'rgba(255,255,255,0.56)')})`,
+          '--scrim': mixCss(a.c1, 13, 'rgba(255,255,255,0.80)'),
           '--skeleton-a': mixCss(a.c1, 9, 'transparent'),
-          '--skeleton-b': mixCss(a.c2, 18, 'transparent'),
-          '--glow': `0 0 0 1px ${rgba(a.c1, 0.16)}, 0 18px 50px ${rgba(a.c2, 0.14)}`,
-          '--shadow': `0 2px 4px rgba(25,30,35,0.06), 0 18px 44px ${rgba(a.c2, 0.14)}`,
+          '--skeleton-b': mixCss(a.c1, 18, 'transparent'),
+          '--glow': `0 0 0 1px ${rgba(a.c1, 0.16)}, 0 18px 50px ${rgba(a.c1, 0.14)}`,
+          '--shadow': `0 2px 4px rgba(25,30,35,0.06), 0 18px 44px ${rgba(a.c1, 0.14)}`,
         };
 
   return {

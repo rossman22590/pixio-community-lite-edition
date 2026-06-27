@@ -668,9 +668,22 @@ const studioCss = (pal: ReturnType<typeof paletteFor>, _theme: Theme) => `
   .px-toast-dot { width: 8px; height: 8px; border-radius: 50%; }
   @keyframes px-toast-in { from { opacity: 0; transform: translate(-50%, 8px); } to { opacity: 1; transform: translate(-50%, 0); } }
 
-  @media (max-width: 760px) {
-    .px-palette { display: none; }
+  /* responsive */
+  @media (max-width: 1100px) {
+    .px-palette { width: 156px; }
+    .px-readout { padding: 6px 9px; }
+  }
+  @media (max-width: 880px) {
+    .px-bar { flex-wrap: wrap; gap: 8px; padding: 8px 10px; }
+    .px-bar-actions { order: 3; width: 100%; flex: 1 0 100%; overflow-x: auto; padding-bottom: 2px; }
     .px-readout { display: none; }
+    .px-palette { top: 132px; width: 148px; }
+  }
+  @media (max-width: 600px) {
+    .px-palette { display: none; }
+    .px-brandsub { display: none; }
+    .px-bar { left: 8px; right: 8px; top: 8px; }
+    .px-run { padding: 8px 12px; }
   }
 `;
 

@@ -107,9 +107,9 @@ a { color: inherit; text-decoration: none; }
   position: relative;
   color: var(--text);
   background:
-    radial-gradient(1100px 620px at 12% -8%, color-mix(in srgb, var(--pink) 16%, transparent), transparent 60%),
-    radial-gradient(960px 560px at 92% 4%, color-mix(in srgb, var(--violet) 16%, transparent), transparent 58%),
-    radial-gradient(900px 700px at 78% 116%, color-mix(in srgb, var(--violet) 9%, transparent), transparent 60%),
+    radial-gradient(1100px 620px at 12% -8%, color-mix(in srgb, var(--pink) 15%, transparent), transparent 60%),
+    radial-gradient(960px 560px at 92% 4%, color-mix(in srgb, var(--pink) 12%, transparent), transparent 58%),
+    radial-gradient(900px 700px at 78% 116%, color-mix(in srgb, var(--pink) 8%, transparent), transparent 60%),
     var(--bg);
 }
 
@@ -370,6 +370,13 @@ kbd { padding: 2px 8px; border-radius: 6px; background: var(--ghost); border: 1p
 /* ── Drag-and-drop import overlay ──────────────────────────────────────── */
 .drop-overlay { position: fixed; inset: 0; z-index: 190; display: grid; place-items: center; background: var(--scrim); backdrop-filter: blur(10px); }
 .drop-card { display: flex; flex-direction: column; align-items: center; gap: 14px; padding: 44px 60px; border-radius: 24px; color: var(--pink-soft); border: 2px dashed var(--line-strong); background: var(--accent-soft); font-size: 16px; font-weight: 700; }
+
+/* ── Library overlay (global asset browser) ────────────────────────────── */
+.library-scrim { position: fixed; inset: 0; z-index: 140; display: grid; place-items: center; background: rgba(8, 4, 10, 0.78); backdrop-filter: blur(20px); animation: fade-up 0.2s var(--ease); }
+.library { width: min(1180px, calc(100vw - 48px)); height: min(86vh, 900px); display: flex; flex-direction: column; border-radius: 22px; overflow: hidden; background: var(--panel-solid); border: 1px solid var(--line-strong); box-shadow: 0 40px 90px rgba(0, 0, 0, 0.55); }
+.library-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 18px; border-bottom: 1px solid var(--line); background: var(--panel-2); flex-wrap: wrap; }
+.library-body { flex: 1; overflow-y: auto; padding: 18px; }
+@media (max-width: 640px) { .library { width: 100vw; height: 100vh; border-radius: 0; } }
 
 /* ── Remix bar (universal output actions) ──────────────────────────────── */
 .remix-bar { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }

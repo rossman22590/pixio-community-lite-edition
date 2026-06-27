@@ -2,9 +2,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Head from 'next/head';
 import dynamic from 'next/dynamic';
 import {
-  Columns2, Command, KeyRound, Layers3, Moon, Play, Settings2, Sparkles, Sun, Volume2, VolumeX,
+  Columns2, Command, KeyRound, Layers3, Library, Moon, Play, Settings2, Sparkles, Sun, Volume2, VolumeX,
   Workflow as WorkflowIcon, Wand2,
 } from 'lucide-react';
+import LibraryOverlay from '../components/studio/LibraryOverlay';
 import { accentVars, getAccent } from '../lib/studio/theme';
 import SettingsMenu from '../components/studio/SettingsMenu';
 import { useStudio } from '../lib/studio/store';
@@ -54,6 +55,7 @@ export default function Home() {
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const [compareOpen, setCompareOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [libraryOpen, setLibraryOpen] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const [error, setError] = useState('');
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -108,12 +110,13 @@ export default function Home() {
       if (mod && e.key.toLowerCase() === 'k') { e.preventDefault(); setPaletteOpen((o) => !o); return; }
       if (mod && e.key === 'Enter') { e.preventDefault(); onGenerate(); return; }
       if (mod && e.key === '\\') { e.preventDefault(); toggleTheme(); return; }
-      if (e.key === 'Escape') { setPaletteOpen(false); setShortcutsOpen(false); setCompareOpen(false); return; }
+      if (e.key === 'Escape') { setPaletteOpen(false); setShortcutsOpen(false); setCompareOpen(false); setSettingsOpen(false); setLibraryOpen(false); return; }
       if (typing || mod) return;
       if (e.key === '?') { e.preventDefault(); setShortcutsOpen(true); }
       else if (e.key === 'g' || e.key === 'G') setSurface('studio');
       else if (e.key === 'c' || e.key === 'C') setSurface('canvas');
       else if (e.key === 'n' || e.key === 'N') setSurface('nodes');
+      else if (e.key === 'l' || e.key === 'L') setLibraryOpen((o) => !o);
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
@@ -124,6 +127,7 @@ export default function Home() {
       { id: 'go-studio', label: 'Go to Studio', group: 'Navigate', hint: 'G', perform: () => setSurface('studio') },
       { id: 'go-canvas', label: 'Go to Canvas', group: 'Navigate', hint: 'C', perform: () => setSurface('canvas') },
       { id: 'go-nodes', label: 'Go to Nodes', group: 'Navigate', hint: 'N', perform: () => setSurface('nodes') },
+      { id: 'library', label: 'Open Library', group: 'Navigate', hint: 'L', keywords: 'assets gallery', perform: () => setLibraryOpen(true) },
       { id: 'generate', label: 'Generate', group: 'Actions', hint: '⌘↵', keywords: 'run create', perform: onGenerate },
       { id: 'mode-image', label: 'Switch to Images', group: 'Actions', keywords: 'image', perform: () => setMedium('image') },
       { id: 'mode-video', label: 'Switch to Videos', group: 'Actions', keywords: 'video', perform: () => setMedium('video') },
@@ -194,6 +198,7 @@ export default function Home() {
           {compareIds.length >= 2 && (
             <button className="btn sm" onClick={() => setCompareOpen(true)}><Columns2 size={14} /> Compare {compareIds.length}</button>
           )}
+          <button className="btn sm ghost" onClick={() => setLibraryOpen(true)} title="Library (L)"><Library size={14} /> Library{assets.length ? ` ${assets.length}` : ''}</button>
           <button className="btn sm ghost" onClick={() => setPaletteOpen(true)} title="Command palette (⌘K)"><Command size={14} /> <kbd style={{ fontSize: 10 }}>⌘K</kbd></button>
           <button className="btn icon ghost" onClick={toggleTheme} title="Toggle theme (⌘\\)">{theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}</button>
           <button className="btn icon ghost" onClick={() => setSettingsOpen((o) => !o)} title="Settings & accent color"><Settings2 size={16} /></button>
@@ -240,6 +245,7 @@ export default function Home() {
       <ShortcutsSheet open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
       <CompareView open={compareOpen} onClose={() => setCompareOpen(false)} />
       <SettingsMenu open={settingsOpen} onClose={() => setSettingsOpen(false)} />
+      <LibraryOverlay open={libraryOpen} onClose={() => setLibraryOpen(false)} />
 
       {dragOver && (
         <div className="drop-overlay" onDrop={onDrop} onDragOver={(e) => e.preventDefault()}>
