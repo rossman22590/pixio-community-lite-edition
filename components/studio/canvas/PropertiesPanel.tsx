@@ -284,6 +284,8 @@ export const PropertiesPanel: React.FC<{
           flex-direction: column;
           overflow: hidden;
         }
+        @media (max-width: 1024px) { .panel { width: 230px; flex-basis: 230px; } }
+        @media (max-width: 820px) { .panel { display: none; } }
         .scroll {
           flex: 1 1 auto;
           overflow-y: auto;

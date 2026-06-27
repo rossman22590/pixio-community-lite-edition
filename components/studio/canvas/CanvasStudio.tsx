@@ -1458,7 +1458,7 @@ const CanvasStudio: React.FC<CanvasStudioProps> = ({
           height: 56px;
           padding: 0 16px;
           flex: 0 0 auto;
-          background: linear-gradient(180deg, ${TOKENS.panel}, color-mix(in srgb, var(--violet) 8%, var(--bg)));
+          background: linear-gradient(180deg, ${TOKENS.panel}, color-mix(in srgb, var(--pink) 8%, var(--bg)));
           border-bottom: 1px solid ${TOKENS.line};
           z-index: 20;
         }
@@ -1582,7 +1582,7 @@ const CanvasStudio: React.FC<CanvasStudioProps> = ({
           overflow: hidden;
           background: radial-gradient(
               1200px 700px at 50% -10%,
-              color-mix(in srgb, var(--violet) 10%, transparent),
+              color-mix(in srgb, var(--pink) 10%, transparent),
               transparent 60%
             ),
             ${TOKENS.bg};
@@ -1691,6 +1691,22 @@ const CanvasStudio: React.FC<CanvasStudioProps> = ({
         .toast.success {
           border-color: ${TOKENS.mint};
           background: rgba(52, 211, 153, 0.14);
+        }
+
+        /* responsive */
+        @media (max-width: 900px) {
+          .brand { width: auto; }
+          .bname { display: none; }
+        }
+        @media (max-width: 680px) {
+          .topbar { height: 50px; padding: 0 10px; }
+          .rail { width: 50px; padding: 10px 0; gap: 6px; }
+          .flyout { left: 60px; top: 56px; right: 8px; }
+          .tcenter { gap: 4px; }
+        }
+        @media (max-width: 520px) {
+          .tright .tbtn:not(.primary) { font-size: 0; padding: 8px; }
+          .tright .tbtn svg { width: 16px; height: 16px; }
         }
       `}</style>
     </div>
